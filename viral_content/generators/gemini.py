@@ -36,7 +36,14 @@ class GeminiGenerator(ContentGenerator):
 
     def _generate_internal(self, prompt: str) -> GenerationResult:
         try:
-            response = self._model_client.generate_content(prompt)
+            options = {"timeout": self.config.timeout}
+            if self.config.max_attempts == 1:
+                options["retry"] = None
+            response = self._model_client.generate_content(
+                prompt,
+                generation_config={"max_output_tokens": self.config.max_tokens},
+                request_options=options,
+            )
             content = response.text
 
             # Gemini 不返回token使用情况，估算
@@ -46,7 +53,8 @@ class GeminiGenerator(ContentGenerator):
                 content=content,
                 platform="gemini",
                 model=self.model,
-                tokens_used=tokens_used
+                tokens_used=tokens_used,
+                truncated=any(candidate.finish_reason == 2 for candidate in response.candidates),
             )
 
         except Exception as e:  # noqa: BLE001 - SDK exception types vary by provider

@@ -23,7 +23,9 @@ jobs:
       - run: python -m pip install pytest
       - run: python -m pip install pip-audit build
       - run: python -m pytest -q
-      - run: python -m compileall -q viral_content viral_content_cli.py viral_article_cli.py
+      - run: python -m compileall -q viral_content viral_content_cli.py viral_article_cli.py viral_content_revision.py viral_content_drafting.py
+      - run: python -S -m unittest discover -s tests -p test_revision.py -q
+      - run: python -S examples/direct_drafting_demo.py --output output/direct-demo
       - run: python scripts/check_docs.py
       - run: python scripts/check_secrets.py
       - run: python scripts/validate_config.py data/accounts/default_account.yaml --kind account
@@ -34,4 +36,4 @@ jobs:
       - run: python -m build --wheel --no-isolation
       - run: pip-audit -r requirements.txt
       - run: python -m pip install dist/*.whl --target .ci-wheel-check --no-deps
-      - run: python -c "import sys; sys.path.insert(0, '.ci-wheel-check'); import viral_content; print(viral_content.__version__)"
+      - run: python -I -c "import sys; from pathlib import Path; target = Path('.ci-wheel-check').resolve(); sys.path.insert(0, str(target)); import viral_content, viral_content_revision, viral_content_drafting; assert all(Path(m.__file__).resolve().is_relative_to(target) for m in (viral_content, viral_content_revision, viral_content_drafting)); print(viral_content.__version__)"

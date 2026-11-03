@@ -11,7 +11,7 @@ import logging
 import time
 from abc import ABC, abstractmethod
 
-from viral_content.config.constants import MAX_RETRIES, RETRY_DELAY
+from viral_content.config.constants import RETRY_DELAY
 from viral_content.exceptions.custom import APIError
 from viral_content.models.generation import GenerationConfig, GenerationResult
 from viral_content.utils.skill_loader import load_skill
@@ -29,7 +29,7 @@ class ContentGenerator(ABC):
 
     def __init__(self, config: GenerationConfig):
         self.config = config
-        self.skill_content = load_skill()
+        self.skill_content = config.system_prompt if config.system_prompt is not None else load_skill()
         self._client = None
         self._setup_client()
 
@@ -48,6 +48,8 @@ class ContentGenerator(ABC):
 
     def build_prompt(self) -> str:
         """构建提示词（基础版本，v4.0 将由 PromptCompiler 替代）"""
+        if self.config.user_prompt is not None:
+            return self.config.user_prompt
         return f"""请用{self.config.style}风格，写一篇关于"{self.config.topic}"的文章，目标字数：{self.config.word_count}字。
 
 要求：
@@ -73,9 +75,12 @@ class ContentGenerator(ABC):
         last_error = None
         prompt = self.build_prompt()
 
-        for attempt in range(MAX_RETRIES):
+        attempts = self.config.max_attempts
+        if type(attempts) is not int or attempts < 1:
+            raise APIError("max_attempts must be a positive integer")
+        for attempt in range(attempts):
             try:
-                logger.info(f"调用 {self.PLATFORM_NAME} API (尝试 {attempt + 1}/{MAX_RETRIES})...")
+                logger.info(f"调用 {self.PLATFORM_NAME} API (尝试 {attempt + 1}/{attempts})...")
 
                 start_time = time.time()
                 result = self._generate_internal(prompt)
@@ -91,7 +96,9 @@ class ContentGenerator(ABC):
 
             except Exception as e:  # noqa: BLE001 - SDK exception types vary by provider
                 last_error = e
-                if attempt < MAX_RETRIES - 1:
+                if attempts == 1:
+                    raise APIError(f"{self.PLATFORM_NAME} request failed") from e
+                if attempt < attempts - 1:
                     wait_time = RETRY_DELAY * (2 ** attempt)  # 指数退避
                     logger.warning(f"API调用失败，{wait_time}秒后重试: {e}")
                     time.sleep(wait_time)

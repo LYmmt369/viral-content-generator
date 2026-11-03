@@ -1,29 +1,62 @@
-# Viral Content Generator
+# Viral Content Generator v4.1.0
 
-An experiment-ready workflow for turning one topic into platform-aware content drafts.
+**Draft from your own materials, then make exact, reversible edits.**
 
-**Topic + account fingerprint + style constraints + conversion goal = testable drafts**
+One source file and one instruction produce a manuscript. One manuscript and one editing instruction produce bounded replacements, a readable diff and an undo receipt.
 
-## Why fork this project?
+[中文](README.md) · [Detailed usage](docs/precise-revisions.md) · [Changes](CHANGELOG.md)
 
-- Run a deterministic local demo without an API key: `python examples/local_demo.py`.
-- Keep accounts, offers, styles and prompts in editable YAML/Markdown files.
-- Generate multiple candidates, apply a deterministic quality gate, and rank them with explainable weights.
-- Record real publishing feedback and iterate on one variable at a time.
+## Local demonstration
 
-This project does not promise viral reach or sales. It provides a repeatable workflow for testing content ideas.
-
-## Quick start
+Python 3.10–3.12, no API key or dependencies required:
 
 ```bash
-pip install -r requirements.txt
-python viral_content_cli.py --topic "AI agent workflow" --goal leads --platform xiaohongshu --variants 3 --score
+python examples/direct_drafting_demo.py --output output/direct-demo
 ```
 
-See the [Chinese README](./README.md), [30-second demo](./examples/30-second-demo.md), [case study](./examples/case-study.md), and [v4.1 roadmap](./docs/v4.1-roadmap.md).
+The demonstration uses labeled, fixed model replies. It validates the workflow rather than real model writing quality.
 
-See the [commercial readiness checklist](./docs/commercial-readiness.md), [privacy boundaries](./docs/privacy.md), and [latest release](https://github.com/Sunnyeung369/viral-content-generator/releases/tag/v4.0.1).
+## Use a model
 
-## Contributing
+```bash
+pip install .
+viral-revise write notes.md "Write a concise project introduction using these materials" --provider openai --model YOUR_MODEL --output draft.md
+viral-revise edit draft.md "Shorten only the long sentences" --provider openai --model YOUR_MODEL --output revised.md
+viral-revise revert revised.md revised.md.receipt.json --output restored.md
+```
 
-Start with [GOOD_FIRST_ISSUE.md](./GOOD_FIRST_ISSUE.md), use the issue and PR templates, and run `python -m pytest -q` before submitting changes.
+Choose an available model identifier. OpenAI uses Chat Completions. Configure OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY / GEMINI_API_KEY for the selected provider; VIRAL_API_KEY is an optional project-specific override. VIRAL_PROVIDER and VIRAL_MODEL can supply command defaults.
+
+Use repeatable --protect arguments for exact quotations that must remain unchanged. The caller, not the model, owns the source version and protection list.
+
+## What the program checks
+
+Only uniquely located, non-overlapping replacements can be applied. Everything outside those ranges stays byte-for-byte unchanged in UTF-8. Protected quotations cannot overlap a replacement. Invalid proposals, stale source versions, truncated responses and existing output paths are rejected. Undo verifies both version hashes.
+
+The edit, receipt and diff are saved together after validation. Source drafting records the source and result hashes. A provider workflow makes one generation attempt without skill routing, interviews or background orchestration.
+
+The program enforces edit boundaries. The model still determines what to change; writing quality and factual correctness require review. No factual or publishing-performance guarantee is implied.
+
+## Offline edits
+
+```bash
+viral-revise fingerprint draft.md
+viral-revise apply draft.md edits.json --output revised.md
+```
+
+These commands and revert use only the standard library. From a source checkout, use python viral_content_revision.py instead of viral-revise.
+
+Legacy v4 styles, account templates and single-platform generation remain available. Multiple platform arguments are rejected instead of silently dropping later platforms, and candidates failing the gate are not saved.
+
+## Validation
+
+```bash
+python -m pytest -q
+python scripts/check_docs.py
+python scripts/check_secrets.py
+python -m build --wheel
+```
+
+[Validation scope](docs/v4.1-validation.md) · [Roadmap](docs/v4.1-roadmap.md) · [Contributing](CONTRIBUTING.md) · [Citation](CITATION.cff)
+
+MIT License.

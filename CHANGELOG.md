@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-11-03
+
+- 新增 viral-revise write / edit：直接从材料成稿，或用一句话生成有限修改；复用现有模型接口，每次工作流只生成一次，显式提示不加载旧 Skill。
+- 新增只使用标准库的精准改稿内核：限定修改范围、保护原句、核验稿件版本、记录 diff，并准确撤回。
+- 新增无 Key 的虚构对照示例和改稿边界测试。
+- 收窄迭代方向到单篇稿件的生成与精准修改；不扩展自动 Skill 路由、主动访谈及通用商业中间层。
+- 新增模型输入、解析失败、截断、保护范围、并发源稿变化、真实 SDK 本地 HTTP 交互等验证；没有真实付费模型或发布效果验证。
+- 修复旧 CLI 的生成器参数、--topic 入口及版本号；多平台输入明确拒绝，未通过检查的候选不再保存。
+- 修正旧平台适配器的 Callable 类型注解，恢复 Python 3.10–3.12 的模块导入。
+- 修正 CLI 模块的打包位置，并移除与 MIT 许可表达式重复的旧分类字段，兼容当前构建工具。
+
 ## [4.0.1] - 2026-09-15
 
 ### 修复与工程质量

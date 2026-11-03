@@ -22,10 +22,18 @@ class OpenAIGenerator(ContentGenerator):
     PLATFORM_NAME = "OpenAI"
     DEFAULT_MODEL = "gpt-4o"
 
+    def _generation_options(self) -> dict:
+        if self.config.system_prompt is not None:
+            return {"max_completion_tokens": self.config.max_tokens}
+        return {"temperature": self.config.temperature, "max_tokens": self.config.max_tokens}
+
     def _setup_client(self) -> None:
         try:
             from openai import OpenAI
-            self._client = OpenAI(api_key=self.config.api_key)
+            options = {"api_key": self.config.api_key, "timeout": self.config.timeout}
+            if self.config.max_attempts == 1:
+                options["max_retries"] = 0
+            self._client = OpenAI(**options)
         except ImportError:
             raise APIError("未安装openai库，请运行: pip install openai")
 
@@ -40,8 +48,7 @@ class OpenAIGenerator(ContentGenerator):
                     {"role": "system", "content": self.skill_content},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=self.config.temperature,
-                max_tokens=self.config.max_tokens
+                **self._generation_options()
             )
 
             content = response.choices[0].message.content or ""
@@ -68,8 +75,7 @@ class OpenAIGenerator(ContentGenerator):
                 {"role": "system", "content": self.skill_content},
                 {"role": "user", "content": prompt}
             ],
-            temperature=self.config.temperature,
-            max_tokens=self.config.max_tokens,
+            **self._generation_options(),
             stream=True
         )
 

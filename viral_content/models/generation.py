@@ -33,6 +33,7 @@ class GenerationConfig:
     stream: bool = False
     output_path: str | None = None
 
+
     # v4.0 新增参数
     account_path: str | None = None  # 账号配置文件路径
     offer_path: str | None = None  # 产品配置文件路径
@@ -52,6 +53,12 @@ class GenerationConfig:
     # 输出选项
     save_all_variants: bool = False  # 是否保存所有变体
     output_format: str = 'markdown'  # 输出格式: markdown, json, html
+
+    # Direct drafting uses explicit prompts and a single attempt, without the legacy Skill.
+    system_prompt: str | None = None
+    user_prompt: str | None = None
+    max_attempts: int = 3
+    timeout: float = 60.0
 
 
 @dataclass

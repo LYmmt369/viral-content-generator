@@ -1,11 +1,11 @@
 [build-system]
-requires = ["setuptools>=68.0", "wheel"]
+requires = ["setuptools>=77.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "viral-content-generator"
-version = "4.0.1"
-description = "热点风格成交引擎 - 155+风格基因卡 × 账号定位 × 成交目标 × 多平台适配"
+version = "4.1.0"
+description = "材料成稿与精准改稿：保护原句、保留未改内容、记录差异并准确撤回"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
@@ -16,18 +16,16 @@ keywords = [
     "content-creation",
     "viral-content",
     "writing-assistant",
-    "style-engine",
+    "precise-editing",
     "ai-content",
     "chinese-writing",
-    "conversion-funnel",
-    "hot-trends",
-    "multi-platform"
+    "source-based-writing",
+    "reversible-edits"
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -56,22 +54,22 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Sunnyeung369/viral-content-generator"
-Documentation = "https://github.com/Sunnyeung369/viral-content-generator#readme"
-Repository = "https://github.com/Sunnyeung369/viral-content-generator.git"
-Issues = "https://github.com/Sunnyeung369/viral-content-generator/issues"
+Homepage = "https://github.com/LYmmt369/viral-content-generator"
+Documentation = "https://github.com/LYmmt369/viral-content-generator#readme"
+Repository = "https://github.com/LYmmt369/viral-content-generator.git"
+Issues = "https://github.com/LYmmt369/viral-content-generator/issues"
 
 [project.scripts]
 viral-content = "viral_content_cli:main"
 viral-content-v4 = "viral_content_cli:main"
+viral-revise = "viral_content_revision:main"
 
 [tool.setuptools]
 include-package-data = true
+py-modules = ["viral_content_cli", "viral_content_revision", "viral_content_drafting"]
 
 [tool.setuptools.package-data]
 viral_content = ["resources/**/*"]
-
-py-modules = ["viral_content_cli"]
 
 [tool.setuptools.packages.find]
 where = ["."]

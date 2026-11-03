@@ -25,7 +25,10 @@ class ClaudeGenerator(ContentGenerator):
     def _setup_client(self) -> None:
         try:
             import anthropic
-            self._client = anthropic.Anthropic(api_key=self.config.api_key)
+            options = {"api_key": self.config.api_key, "timeout": self.config.timeout}
+            if self.config.max_attempts == 1:
+                options["max_retries"] = 0
+            self._client = anthropic.Anthropic(**options)
         except ImportError:
             raise APIError("未安装anthropic库，请运行: pip install anthropic")
 
@@ -50,7 +53,8 @@ class ClaudeGenerator(ContentGenerator):
                 content=content,
                 platform="claude",
                 model=self.model,
-                tokens_used=tokens_used
+                tokens_used=tokens_used,
+                truncated=message.stop_reason == "max_tokens",
             )
 
         except Exception as e:  # noqa: BLE001 - SDK exception types vary by provider
@@ -80,5 +84,6 @@ class ClaudeGenerator(ContentGenerator):
             content=content,
             platform="claude",
             model=self.model,
-            tokens_used=tokens_used
+            tokens_used=tokens_used,
+            truncated=message.stop_reason == "max_tokens",
         )

@@ -4,7 +4,7 @@ message: "If this project helps your work, please cite or link to the repository
 type: software
 authors:
   - family-names: "Sunnyeung"
-repository-code: "https://github.com/Sunnyeung369/viral-content-generator"
+repository-code: "https://github.com/LYmmt369/viral-content-generator"
 license: MIT
-version: 4.0.1
-date-released: 2026-09-15
+version: 4.1.0
+date-released: 2026-11-03

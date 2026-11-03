@@ -8,6 +8,7 @@ v4.0 - 一个热点输出全平台版本
 GitHub: https://github.com/Sunnyeung369/viral-content-generator
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, ClassVar
@@ -152,7 +153,7 @@ class PlatformAdapter:
         self,
         topic: str,
         platforms: list[ContentPlatform] | None = None,
-        generator_func: callable | None = None,
+        generator_func: Callable[..., str] | None = None,
         **kwargs
     ) -> list[PlatformPackage]:
         """生成多平台内容包
@@ -389,7 +390,7 @@ class PlatformAdapter:
         self,
         topic: str,
         primary_platform: ContentPlatform,
-        generator_func: callable | None = None,
+        generator_func: Callable[..., str] | None = None,
         **kwargs
     ) -> dict[str, Any]:
         """创建内容矩阵
