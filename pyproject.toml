@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "viral-content-generator"
-version = "4.1.0"
+version = "4.1.1"
 description = "材料成稿与精准改稿：保护原句、保留未改内容、记录差异并准确撤回"
 readme = "README.md"
 license = "MIT"
@@ -66,7 +66,7 @@ viral-revise = "viral_content_revision:main"
 
 [tool.setuptools]
 include-package-data = true
-py-modules = ["viral_content_cli", "viral_content_revision", "viral_content_drafting"]
+py-modules = ["viral_content_cli", "viral_content_revision", "viral_content_drafting", "viral_article_cli"]
 
 [tool.setuptools.package-data]
 viral_content = ["resources/**/*"]

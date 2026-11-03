@@ -1,4 +1,4 @@
-# Viral Content Generator v4.1.0
+# Viral Content Generator v4.1.1
 
 **Draft from your own materials, then make exact, reversible edits.**
 
@@ -46,7 +46,7 @@ viral-revise apply draft.md edits.json --output revised.md
 
 These commands and revert use only the standard library. From a source checkout, use python viral_content_revision.py instead of viral-revise.
 
-Legacy v4 styles, account templates and single-platform generation remain available. Multiple platform arguments are rejected instead of silently dropping later platforms, and candidates failing the gate are not saved.
+Styles and account templates remain available. Multiple platforms generate independent results through the shared pipeline; all requested results must pass checks before any output file is saved.
 
 ## Validation
 
@@ -60,3 +60,7 @@ python -m build --wheel
 [Validation scope](docs/v4.1-validation.md) · [Roadmap](docs/v4.1-roadmap.md) · [Contributing](CONTRIBUTING.md) · [Citation](CITATION.cff)
 
 MIT License.
+
+## Configured multi-platform generation
+
+`viral-content --topic "Case study" --platform wechat xiaohongshu --ai-platform openai --model YOUR_MODEL --output drafts/` produces separate checked manuscripts. The CLI shares the Python pipeline. All requested platforms must pass before files are written. Existing files are never overwritten. Streaming is not supported by the checked workflow. See [API](docs/API文档.md), [Skill](SKILL.md), and [feedback semantics](docs/feedback.md).

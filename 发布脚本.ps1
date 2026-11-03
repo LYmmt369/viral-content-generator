@@ -77,7 +77,7 @@ Write-Host "步骤4：关联远程仓库" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 
 # 添加远程仓库
-git remote add origin https://github.com/Sunnyeung369/viral-content-generator.git
+git remote add origin https://github.com/LYmmt369/viral-content-generator.git
 
 # 设置主分支
 git branch -M main
@@ -109,7 +109,7 @@ Write-Host "🎉 发布完成！" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 
 Write-Host "`n仓库地址：" -ForegroundColor Cyan
-Write-Host "https://github.com/Sunnyeung369/viral-content-generator" -ForegroundColor White
+Write-Host "https://github.com/LYmmt369/viral-content-generator" -ForegroundColor White
 
 Write-Host "`n下一步：" -ForegroundColor Cyan
 Write-Host "1. 访问仓库页面" -ForegroundColor White

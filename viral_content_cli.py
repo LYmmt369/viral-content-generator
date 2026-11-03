@@ -1,16 +1,5 @@
 #!/usr/bin/env python3
-"""
-热点风格成交引擎 - 命令行工具 v4.0
-从"爆款内容生成器"升级为"热点风格成交引擎"
-
-核心公式：
-任何热点话题 + 任意账号定位 + 任意业务目标 + 任意平台格式 + 可组合风格基因 = 高赞、高互动、高成交内容包
-
-作者: Sunnyeung
-版本: 4.0.0
-许可: MIT License
-GitHub: https://github.com/Sunnyeung369/viral-content-generator
-"""
+"""LYmmt369 内容生成与平台输出 CLI 4.1.1。"""
 
 import argparse
 import json
@@ -179,89 +168,42 @@ class ViralContentCLI:
         Returns:
             生成的内容
         """
-        # 1. 建立可追踪实验身份
-        experiment_id = uuid.uuid4().hex[:12]
-        # 2. 加载配置
-        style_config = None
-        if style:
-            style_config = self.style_mixer.get_style(style)
-        elif style_mix:
-            style_ids = [s.strip() for s in style_mix.split(',')]
-            style_config = self.style_mixer.mix_styles(style_ids)
+        from viral_content.core.pipeline import ViralContentPipeline
+        from viral_content.core.platform_adapter import ContentPlatform
+        from viral_content.models import GenerationConfig
+        from viral_content_revision import _check_output_paths, _write_new_files
 
-        account_config = None
-        if account:
-            account_fingerprint = AccountFingerprint(account)
-            account_config = account_fingerprint.to_dict()
-
-        offer_config = None
-        if offer:
-            with open(offer, 'r', encoding='utf-8') as f:
-                data = yaml.safe_load(f)
-                offer_config = data.get('offer', {}) if isinstance(data, dict) else {}
-
-        # 3. 确定内容平台
-        if content_platforms is None or not content_platforms:
-            content_platforms = ['wechat']
-        if len(content_platforms) != 1:
-            raise ValueError("一次生成只接收一个内容平台，请分别运行命令")
-
-        # 4. 构建系统提示词
-        system_prompt = self.compiler.build_system_prompt(
-            topic=topic,
-            style_config=style_config,
-            account_config=account_config,
-            offer_config=offer_config,
-            goal=goal,
-            platform=content_platforms[0],
-        )
-
-        # 5. 创建生成器
-        generator = create_generator(
-            platform=ai_platform,
-            api_key=api_key,
-            model=model,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            system_prompt=system_prompt,
-            stream=stream,
-        )
-
-        # 5. 生成内容
-        user_prompt = f"请根据以上配置，为主题「{topic}」生成一篇{CONTENT_PLATFORMS.get(content_platforms[0], content_platforms[0])}内容。"
-
-        logger.info("开始生成内容...")
-        # 5. 生成候选并按目标选择最佳版本
-        candidate_count = max(1, min(int(variants or 1), 8))
-        candidates = []
-        for index in range(candidate_count):
-            generator.config.user_prompt = user_prompt + (f"\n这是第 {index + 1} 个候选，请使用不同的切入角度。" if candidate_count > 1 else "")
-            result = generator.generate()
-            candidate = result.content
-            gate = QualityGate().check(candidate, require_cta=goal in {"leads", "sales"})
-            score = self._quick_score(candidate, goal)
-            # 有硬性问题的候选降权，但仍保留以便诊断
-            rank_score = score if gate.passed else score - 3.0
-            candidates.append((rank_score, candidate, gate))
-            if gate.warnings:
-                logger.warning("候选 %d 发布前检查: %s", index + 1, "；".join(gate.warnings))
-
-        eligible = [Candidate(content=c, quality_score=score, passed_gate=True, index=i) for i, (score, c, g) in enumerate(candidates) if g.passed]
-        if not eligible:
-            raise ValueError("所有候选均未通过检查，未保存内容")
-        ranked = CandidateRanker(goal, platform=content_platforms[0]).rank(eligible)
-        content = ranked[0].content
-        logger.info("已从 %d 个候选中选择一个通过检查的版本", candidate_count)
-
-        # 6. 可选评分
-        if enable_scoring:
-            logger.info(f"长度参考值: {self._quick_score(content, goal)}/10（不代表内容质量或发布效果）")
-
-        # 9. 保存输出
+        targets = [ContentPlatform(p).value for p in (content_platforms or ["wechat"])]
+        if len(set(targets)) != len(targets):
+            raise ValueError("平台不能重复")
+        if style and style_mix:
+            raise ValueError("style 与 style_mix 只能选一个")
+        if stream:
+            raise ValueError("检查通过前不输出流式草稿，请关闭 stream")
+        output_files = {}
         if output_path:
-            self._save_output(content, output_path, topic, goal, content_platforms[0], experiment_id=experiment_id, candidate_count=candidate_count)
-
-        return content
+            path = Path(output_path)
+            for target in targets:
+                if path.is_dir() or not path.suffix:
+                    filename = path / f"{target}_{uuid.uuid4().hex[:12]}.md"
+                elif len(targets) > 1:
+                    filename = path.with_name(f"{path.stem}.{target}{path.suffix}")
+                else:
+                    filename = path
+                output_files[target] = filename
+            _check_output_paths(list(output_files.values()), [])
+        config = GenerationConfig(topic=topic, platform=ai_platform, model=model,
+            api_key=api_key, temperature=temperature, max_tokens=max_tokens,
+            variants=variants, enable_scoring=enable_scoring)
+        pipeline = ViralContentPipeline()
+        results = [pipeline.run(topic, account, offer, style_mix or style, goal,
+                    target, config=config, generator_factory=create_generator)
+                   for target in targets]
+        if output_files:
+            _write_new_files({output_files[r.content_platform]: r.content for r in results}, [])
+        if len(results) == 1:
+            return results[0].content
+        return "\n\n".join(f"## {r.content_platform}\n\n{r.content}" for r in results)
 
     def batch_generate(
         self,
@@ -367,7 +309,7 @@ class ViralContentCLI:
 def parse_arguments():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(
-        description='热点风格成交引擎 v4.0 - 生成高赞、高互动、高成交内容',
+        description='LYmmt369 内容生成器 4.1.1 - 生成并检查各平台稿件',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 示例用法:
@@ -375,7 +317,7 @@ def parse_arguments():
   # 基础用法（向后兼容v3.1）
   python viral_content_cli.py "AI Agent Runtime崩溃" --style tech_explainer_global
 
-  # v4.0 完整用法
+  # 完整用法
   python viral_content_cli.py \\
     --topic "AI Agent Runtime崩溃" \\
     --account data/accounts/ai_consultant.yaml \\
@@ -522,7 +464,7 @@ def parse_arguments():
     parser.add_argument(
         '--version',
         action='version',
-        version='%(prog)s 4.1.0'
+        version='%(prog)s 4.1.1'
     )
 
     args = parser.parse_args()
@@ -581,12 +523,13 @@ def main():
             stream=args.stream,
             output_path=args.output,
             enable_scoring=args.score,
+            variants=args.variants,
         )
 
         # 输出结果
         success_count = sum(1 for r in results if r.get('success'))
         logger.info(f"批量生成完成: {success_count}/{len(results)} 成功")
-        return 0
+        return 0 if success_count == len(results) else 1
 
     # 单一生成
     try:

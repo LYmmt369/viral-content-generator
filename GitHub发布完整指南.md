@@ -1,10 +1,12 @@
+> 历史资料：以下命令、版本和验收结论不代表当前 4.1.1。当前使用说明见 [README](README.md)。
+
 # GitHub发布完整指南
 
 ## 🎯 你的仓库信息
 
-**GitHub用户名：** Sunnyeung369  
-**仓库名：** viral-content-generator  
-**仓库地址：** https://github.com/Sunnyeung369/viral-content-generator
+**GitHub用户名：** Sunnyeung369
+**仓库名：** viral-content-generator
+**仓库地址：** https://github.com/LYmmt369/viral-content-generator
 
 ---
 
@@ -26,7 +28,7 @@
    ```powershell
    # 右键点击 发布脚本.ps1
    # 选择 "使用PowerShell运行"
-   
+
    # 或者在PowerShell中执行：
    cd "E:\CS写作输出\爆款博文生成器_Skill"
    .\发布脚本.ps1
@@ -77,7 +79,7 @@ git commit -m "feat: 爆款内容生成器 v3.0.0 发布
 
 **步骤6：关联远程仓库**
 ```powershell
-git remote add origin https://github.com/Sunnyeung369/viral-content-generator.git
+git remote add origin https://github.com/LYmmt369/viral-content-generator.git
 git branch -M main
 ```
 
@@ -123,7 +125,7 @@ git push -u origin main
 
 ### 步骤1：创建Release
 
-1. 访问：https://github.com/Sunnyeung369/viral-content-generator/releases/new
+1. 访问：https://github.com/LYmmt369/viral-content-generator/releases/new
 2. 填写信息：
    - **Tag version:** `v3.0.0`
    - **Release title:** `爆款内容生成器 v3.0.0 - 全平台内容创作系统`
@@ -162,7 +164,7 @@ git push -u origin main
 
 ```bash
 # 克隆仓库
-git clone https://github.com/Sunnyeung369/viral-content-generator.git
+git clone https://github.com/LYmmt369/viral-content-generator.git
 
 # 查看文档
 cd viral-content-generator
@@ -193,7 +195,7 @@ cd viral-content-generator
    - 点击仓库页面的 "⚙️" (About旁边)
    - 添加Topics：
      ```
-     ai, content-creation, writing, short-video, skill, chinese, 
+     ai, content-creation, writing, short-video, skill, chinese,
      content-generator, viral-content, multi-platform
      ```
 
@@ -236,7 +238,7 @@ cd viral-content-generator
 📊 完整数据分析
 🔧 开箱即用
 
-GitHub: https://github.com/Sunnyeung369/viral-content-generator
+GitHub: https://github.com/LYmmt369/viral-content-generator
 
 #AI #ContentCreation #OpenSource #Writing
 ```
@@ -248,7 +250,7 @@ GitHub: https://github.com/Sunnyeung369/viral-content-generator
 支持抖音、B站、小红书等8大平台
 8种风格、完整方法论、实战案例
 
-GitHub: https://github.com/Sunnyeung369/viral-content-generator
+GitHub: https://github.com/LYmmt369/viral-content-generator
 
 欢迎Star⭐️
 ```

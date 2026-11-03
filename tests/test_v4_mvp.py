@@ -4,7 +4,7 @@ v4.0 MVP 功能测试脚本
 验证核心功能是否正常工作
 
 作者: Sunnyeung
-版本: 4.0.0
+版本: 4.1.1
 """
 
 import sys
@@ -386,7 +386,7 @@ if __name__ == '__main__':
 
 def test_public_version_and_cli_entrypoint():
     import viral_content
-    assert viral_content.__version__ == '4.1.0'
+    assert viral_content.__version__ == '4.1.1'
     from viral_content_cli import main
     assert callable(main)
 
@@ -424,7 +424,7 @@ def test_feedback_record_serializes():
 def test_feedback_summary_warns_on_small_sample():
     from viral_content.core.experiment import FeedbackRecord, summarize_feedback
     summary = summarize_feedback([FeedbackRecord(0, 'douyin', '2026-09-15', impressions=100, comments=5)])
-    assert summary.winner_index == 0
+    assert summary.winner_index is None
     assert not summary.reliable
     assert '样本量' in summary.note
 

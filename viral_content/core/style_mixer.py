@@ -3,9 +3,9 @@
 v4.0 - 风格基因组合引擎
 
 作者: Sunnyeung
-版本: 4.0.0
+版本: 4.1.1
 许可: MIT License
-GitHub: https://github.com/Sunnyeung369/viral-content-generator
+GitHub: https://github.com/LYmmt369/viral-content-generator
 """
 
 from pathlib import Path
@@ -41,8 +41,8 @@ class StyleMixer:
     def styles_dir(self) -> Path:
         """获取风格配置目录"""
         if self._styles_dir is None:
-            current_dir = Path(__file__).parent.parent.parent
-            self._styles_dir = current_dir / "data" / "styles"
+            from viral_content.config.constants import STYLES_DIR
+            self._styles_dir = STYLES_DIR
         return self._styles_dir
 
     @styles_dir.setter
@@ -215,6 +215,7 @@ class StyleMixer:
         return {
             "mixed_style": True,
             "component_styles": style_ids,
+            "source_styles": styles,
             "weights": weights,
             "features": mixed,
         }

@@ -1,4 +1,4 @@
-# Viral Content Generator v4.1.0
+# Viral Content Generator v4.1.1
 
 **用自己的材料成稿，再按作者意图精准改好。**
 
@@ -67,7 +67,7 @@ viral-revise apply draft.md edits.json --output revised.md
 
 项目聚焦材料成稿与单篇稿件的精准迭代。没有自动 Skill 路由、主动访谈、通用商业诊断、多 Agent 编排或后台任务。新入口通过显式提示直接调用现有模型适配器，不加载旧 Skill 方法库。
 
-v4 的风格卡、账号、产品与单平台生成接口继续保留。旧命令一次只接收一个内容平台；质量检查失败的候选不再保存。旧的长度参考值不能预测内容质量、流量或成交。
+v4 的风格卡、账号、产品与单平台生成接口继续保留。CLI 与 Python API 共用生成流程，支持一次请求多个内容平台，全部通过检查后分别保存；质量检查失败的候选不再保存。旧的长度参考值不能预测内容质量、流量或成交。
 
 ## 验证与维护
 
@@ -81,3 +81,13 @@ python -m build --wheel
 [验收范围与方法](docs/v4.1-validation.md) · [当前路线](docs/v4.1-roadmap.md) · [旧规则演示](examples/local_demo.py) · [v4 文档](docs/v4.0_升级说明.md) · [引用信息](CITATION.cff) · [贡献指南](CONTRIBUTING.md)
 
 MIT License。项目不承诺爆款、成交或自动事实核查。
+
+## 配置与多平台
+
+```bash
+viral-content --topic "项目案例" --account data/accounts/default_account.yaml --style tech_explainer_global --platform wechat xiaohongshu --ai-platform openai --model YOUR_MODEL --output drafts/
+```
+
+目录输出使用各平台独立文件名；若指定 draft.md，多平台输出为 draft.wechat.md、draft.xiaohongshu.md。已有文件不会覆盖。非流式生成通过检查后交付，--stream 暂不支持。
+
+[Skill 入口](SKILL.md) · [当前 API](docs/API文档.md) · [反馈口径](docs/feedback.md)

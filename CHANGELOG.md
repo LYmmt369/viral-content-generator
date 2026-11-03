@@ -1,3 +1,12 @@
+# 更新记录
+
+## 4.1.1 — 2026-11-04
+
+- 统一项目署名、仓库链接、Skill 与 CLI 入口。
+- 修复配置字段遗漏、Python Pipeline、真实多平台执行及失败输出。
+- 反馈保留作品和观察身份，缺分母返回未知，累计快照去重，取消自动可靠性与胜者判断。
+- 安装包资源使用包内路径，旧脚本入口委托当前 CLI。
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -452,9 +461,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 链接
 
-- [GitHub仓库](https://github.com/Sunnyeung369/viral-content-generator)
-- [问题反馈](https://github.com/Sunnyeung369/viral-content-generator/issues)
-- [讨论区](https://github.com/Sunnyeung369/viral-content-generator/discussions)
+- [GitHub仓库](https://github.com/LYmmt369/viral-content-generator)
+- [问题反馈](https://github.com/LYmmt369/viral-content-generator/issues)
+- [讨论区](https://github.com/LYmmt369/viral-content-generator/discussions)
 
 ---
 

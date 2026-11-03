@@ -3,11 +3,12 @@
 v4.0 - 动态编译提示词
 
 作者: Sunnyeung
-版本: 4.0.0
+版本: 4.1.1
 许可: MIT License
-GitHub: https://github.com/Sunnyeung369/viral-content-generator
+GitHub: https://github.com/LYmmt369/viral-content-generator
 """
 
+import json
 from pathlib import Path
 from string import Template
 from typing import Any
@@ -31,8 +32,9 @@ class PromptCompiler:
         """
         if prompts_dir is None:
             # 默认使用项目根目录下的prompts目录
-            current_dir = Path(__file__).parent.parent.parent
-            prompts_dir = current_dir / "prompts"
+            from viral_content.config.constants import PROMPTS_DIR
+
+            prompts_dir = PROMPTS_DIR
 
         self.prompts_dir = Path(prompts_dir)
         self._templates: dict[str, str] = {}
@@ -64,12 +66,7 @@ class PromptCompiler:
         self._templates[template_name] = content
         return content
 
-    def compile(
-        self,
-        template_name: str,
-        variables: dict[str, Any] | None = None,
-        **kwargs
-    ) -> str:
+    def compile(self, template_name: str, variables: dict[str, Any] | None = None, **kwargs) -> str:
         """编译单个模板
 
         Args:
@@ -104,7 +101,7 @@ class PromptCompiler:
         templates: list[str],
         variables: dict[str, Any] | None = None,
         separator: str = "\n\n---\n\n",
-        **kwargs
+        **kwargs,
     ) -> str:
         """组合多个模板
 
@@ -132,7 +129,7 @@ class PromptCompiler:
         offer_config: dict[str, Any] | None = None,
         goal: str = "likes",
         platform: str = "wechat",
-        **kwargs
+        **kwargs,
     ) -> str:
         """构建完整的系统提示词
 
@@ -206,62 +203,19 @@ class PromptCompiler:
 
         return base_prompt
 
+    @staticmethod
+    def _format_config(config: dict[str, Any]) -> str:
+        """Preserve every supplied field, including lists and nested constraints."""
+        return json.dumps(config, ensure_ascii=False, indent=2, allow_nan=False)
+
     def _format_style_config(self, style_config: dict[str, Any]) -> str:
-        """格式化风格配置"""
-        parts = []
-
-        if "label" in style_config:
-            parts.append(f"**风格**: {style_config['label']}")
-
-        if "style_dna" in style_config:
-            dna = style_config["style_dna"]
-            if isinstance(dna, dict):
-                tone = dna.get("tone", "")
-                if tone:
-                    parts.append(f"**语气**: {tone}")
-
-        if "hook_patterns" in style_config:
-            hooks = style_config["hook_patterns"]
-            if isinstance(hooks, list) and hooks:
-                parts.append("**钩子模式**:\n" + "\n".join(f"  - {h}" for h in hooks[:3]))
-
-        return "\n".join(parts)
+        return self._format_config(style_config)
 
     def _format_account_config(self, account_config: dict[str, Any]) -> str:
-        """格式化账号配置"""
-        parts = []
-
-        if "name" in account_config:
-            parts.append(f"**账号名称**: {account_config['name']}")
-
-        if "identity" in account_config:
-            parts.append(f"**定位**: {account_config['identity']}")
-
-        if "target_audience" in account_config:
-            audience = account_config["target_audience"]
-            if isinstance(audience, list) and audience:
-                parts.append("**目标用户**:\n" + "\n".join(f"  - {a}" for a in audience[:3]))
-
-        return "\n".join(parts)
+        return self._format_config(account_config)
 
     def _format_offer_config(self, offer_config: dict[str, Any]) -> str:
-        """格式化产品配置"""
-        parts = []
-
-        if "name" in offer_config:
-            parts.append(f"**产品名称**: {offer_config['name']}")
-
-        if "unique_value_proposition" in offer_config:
-            uvp = offer_config["unique_value_proposition"]
-            if isinstance(uvp, list) and uvp:
-                parts.append("**核心卖点**:\n" + "\n".join(f"  - {v}" for v in uvp[:3]))
-
-        if "pricing" in offer_config:
-            pricing = offer_config["pricing"]
-            if isinstance(pricing, dict):
-                parts.append("**价格阶梯**:\n" + "\n".join(f"  - {k}: {v}" for k, v in pricing.items()))
-
-        return "\n".join(parts)
+        return self._format_config(offer_config)
 
     def clear_cache(self):
         """清除缓存"""

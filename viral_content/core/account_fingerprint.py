@@ -3,9 +3,9 @@
 v4.0 - 账号定位和目标用户管理
 
 作者: Sunnyeung
-版本: 4.0.0
+版本: 4.1.1
 许可: MIT License
-GitHub: https://github.com/Sunnyeung369/viral-content-generator
+GitHub: https://github.com/LYmmt369/viral-content-generator
 """
 
 from pathlib import Path
@@ -41,8 +41,8 @@ class AccountFingerprint:
     def accounts_dir(self) -> Path:
         """获取账号配置目录"""
         if self._accounts_dir is None:
-            current_dir = Path(__file__).parent.parent.parent
-            self._accounts_dir = current_dir / "data" / "accounts"
+            from viral_content.config.constants import ACCOUNTS_DIR
+            self._accounts_dir = ACCOUNTS_DIR
         return self._accounts_dir
 
     def load(self, account_path: Path | None = None) -> dict[str, Any]:

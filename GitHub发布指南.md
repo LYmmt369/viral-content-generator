@@ -1,3 +1,5 @@
+> 历史资料：以下命令、版本和验收结论不代表当前 4.1.1。当前使用说明见 [README](README.md)。
+
 # GitHub发布准备清单
 
 ## 📦 已准备好的文件
@@ -51,13 +53,13 @@ git push -u origin main
    ```bash
    # 打开PowerShell，进入目录
    cd "E:\CS写作输出\爆款博文生成器_Skill"
-   
+
    # 初始化Git
    git init
-   
+
    # 添加所有文件
    git add .
-   
+
    # 提交
    git commit -m "feat: 爆款博文生成器 Skill v2.0"
    ```
@@ -66,7 +68,7 @@ git push -u origin main
    ```bash
    # 替换成你的GitHub用户名
    git remote add origin https://github.com/你的用户名/viral-article-skill.git
-   
+
    # 推送
    git branch -M main
    git push -u origin main

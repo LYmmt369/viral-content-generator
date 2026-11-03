@@ -2,9 +2,9 @@
 账号指纹数据模型
 
 作者: Sunnyeung
-版本: 4.0.0
+版本: 4.1.1
 许可: MIT License
-GitHub: https://github.com/Sunnyeung369/viral-content-generator
+GitHub: https://github.com/LYmmt369/viral-content-generator
 """
 
 from dataclasses import dataclass, field

@@ -2,9 +2,9 @@
 内容生成器抽象基类
 
 作者: Sunnyeung
-版本: 4.0.0
+版本: 4.1.1
 许可: MIT License
-GitHub: https://github.com/Sunnyeung369/viral-content-generator
+GitHub: https://github.com/LYmmt369/viral-content-generator
 """
 
 import logging
@@ -50,17 +50,10 @@ class ContentGenerator(ABC):
         """构建提示词（基础版本，v4.0 将由 PromptCompiler 替代）"""
         if self.config.user_prompt is not None:
             return self.config.user_prompt
-        return f"""请用{self.config.style}风格，写一篇关于"{self.config.topic}"的文章，目标字数：{self.config.word_count}字。
+        return (f"请根据已提供的材料，以{self.config.style}写作关于「{self.config.topic}」的文章，"
+                f"目标长度约{self.config.word_count}字。保留事实边界，缺少依据时标明待核实；"
+                "直接输出稿件，不编造经历、数据和来源。")
 
-要求：
-1. 严格按照Skill中的方法论创作
-2. 应用用户决策4次判断模型
-3. 确保内容质量达到HKR评分标准
-4. 字数控制在{self.config.word_count}字左右（误差±10%）
-5. 前句建立相关性，前20行建立信任
-6. 完整内容提供真价值，结尾展示利用价值
-
-请直接输出文章内容，不需要额外的解释或说明。"""
 
     def generate(self) -> GenerationResult:
         """

@@ -3,9 +3,9 @@
 v4.0 - 一个热点输出全平台版本
 
 作者: Sunnyeung
-版本: 4.0.0
+版本: 4.1.1
 许可: MIT License
-GitHub: https://github.com/Sunnyeung369/viral-content-generator
+GitHub: https://github.com/LYmmt369/viral-content-generator
 """
 
 from collections.abc import Callable
@@ -170,6 +170,8 @@ class PlatformAdapter:
         if platforms is None:
             platforms = self.supported_platforms
 
+        if generator_func is None:
+            raise ValueError("生成内容包需要提供 generator_func；提示词请使用独立提示词接口")
         packages = []
 
         for platform in platforms:
@@ -187,7 +189,7 @@ class PlatformAdapter:
 
             package = PlatformPackage(
                 platform=platform,
-                content=content,
+                content=self._validate_content(content),
                 metadata={
                     "spec": spec.to_dict(),
                     "topic": topic,
@@ -309,7 +311,8 @@ class PlatformAdapter:
         self,
         content: str,
         from_platform: ContentPlatform,
-        to_platforms: list[ContentPlatform] | None = None
+        to_platforms: list[ContentPlatform] | None = None,
+        generator_func: Callable[..., str] | None = None,
     ) -> list[PlatformPackage]:
         """批量转换内容到多个平台
 
@@ -321,6 +324,8 @@ class PlatformAdapter:
         Returns:
             转换后的内容包列表
         """
+        if generator_func is None:
+            raise ValueError("平台转换需要提供 generator_func；convert_to_platform 仅构建提示词")
         if to_platforms is None:
             to_platforms = [p for p in self.supported_platforms if p != from_platform]
 
@@ -331,7 +336,7 @@ class PlatformAdapter:
 
             package = PlatformPackage(
                 platform=platform,
-                content=converted_prompt,
+                content=self._validate_content(generator_func(converted_prompt, platform)),
                 metadata={
                     "from_platform": from_platform.value,
                     "conversion": True,
@@ -341,6 +346,13 @@ class PlatformAdapter:
             packages.append(package)
 
         return packages
+
+    @staticmethod
+    def _validate_content(content: str) -> str:
+        from .quality_gate import QualityGate
+        if not isinstance(content, str) or not QualityGate().check(content).passed:
+            raise ValueError("生成内容未通过检查")
+        return content
 
     def get_recommended_platforms(
         self,

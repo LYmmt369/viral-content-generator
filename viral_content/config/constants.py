@@ -2,9 +2,9 @@
 常量定义
 
 作者: Sunnyeung
-版本: 4.0.0
+版本: 4.1.1
 许可: MIT License
-GitHub: https://github.com/Sunnyeung369/viral-content-generator
+GitHub: https://github.com/LYmmt369/viral-content-generator
 """
 
 from pathlib import Path
@@ -15,7 +15,7 @@ RESOURCES_ROOT = PROJECT_ROOT / "resources"
 SOURCE_ROOT = PROJECT_ROOT.parent
 
 # Skill 文件路径
-SKILL_V3_PATH = RESOURCES_ROOT / "skill_v3.0.md"
+SKILL_V3_PATH = RESOURCES_ROOT / "skill.md"
 SKILL_FALLBACK_PATH = RESOURCES_ROOT / "skill.md"
 PROMPTS_DIR = RESOURCES_ROOT / "prompts"
 

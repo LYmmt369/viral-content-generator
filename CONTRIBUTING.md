@@ -92,7 +92,7 @@
 ### 步骤2：克隆到本地
 
 ```bash
-git clone https://github.com/Sunnyeung369/viral-content-generator.git
+git clone https://github.com/LYmmt369/viral-content-generator.git
 cd viral-content-generator
 ```
 
@@ -266,7 +266,7 @@ git commit -m "chore(deps): 更新依赖版本"
 
 ### 报告Bug
 
-使用[Issue模板](https://github.com/Sunnyeung369/viral-content-generator/issues/new?template=bug_report.md)报告Bug。
+使用[Issue模板](https://github.com/LYmmt369/viral-content-generator/issues/new?template=bug_report.md)报告Bug。
 
 **请包含：**
 1. 问题描述
@@ -278,7 +278,7 @@ git commit -m "chore(deps): 更新依赖版本"
 
 ### 功能请求
 
-使用[Issue模板](https://github.com/Sunnyeung369/viral-content-generator/issues/new?template=feature_request.md)提出功能请求。
+使用[Issue模板](https://github.com/LYmmt369/viral-content-generator/issues/new?template=feature_request.md)提出功能请求。
 
 **请包含：**
 1. 功能描述
@@ -415,8 +415,8 @@ docs/
 如果你需要帮助：
 
 1. 查看[文档](./README.md)
-2. 搜索[已有Issues](https://github.com/Sunnyeung369/viral-content-generator/issues)
-3. 在[Discussions](https://github.com/Sunnyeung369/viral-content-generator/discussions)提问
+2. 搜索[已有Issues](https://github.com/LYmmt369/viral-content-generator/issues)
+3. 在[Discussions](https://github.com/LYmmt369/viral-content-generator/discussions)提问
 4. 创建新的Issue
 
 ---
