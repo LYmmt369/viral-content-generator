@@ -33,7 +33,7 @@ jobs:
       - run: python scripts/validate_config.py data/styles/global_creators.yaml --kind style
       - run: python scripts/list_styles.py
       - run: python -m pip install build
-      - run: python -m build --wheel --no-isolation
+      - run: python -m build --wheel
       - run: pip-audit -r requirements.txt
       - run: python -m pip install dist/*.whl --target .ci-wheel-check --no-deps
       - run: python -I -c "import sys; from pathlib import Path; target = Path('.ci-wheel-check').resolve(); sys.path.insert(0, str(target)); import viral_content, viral_content_revision, viral_content_drafting; assert all(Path(m.__file__).resolve().is_relative_to(target) for m in (viral_content, viral_content_revision, viral_content_drafting)); print(viral_content.__version__)"
