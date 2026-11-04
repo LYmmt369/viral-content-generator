@@ -3,7 +3,7 @@
 v4.0 - 一个热点输出全平台版本
 
 作者: Sunnyeung
-版本: 4.1.3
+版本: 4.1.4
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """

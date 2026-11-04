@@ -1,4 +1,4 @@
-# LYmmt369 Viral Content Generator 4.1.3 API
+# LYmmt369 Viral Content Generator 4.1.4 API
 
 安装：在仓库根目录运行 `pip install .`。模型调用需要对应环境变量密钥。下列 YOUR_MODEL 替换为账号可用模型。
 

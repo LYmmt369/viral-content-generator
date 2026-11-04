@@ -126,10 +126,11 @@ def summarize_feedback(records: list[FeedbackRecord], min_samples: int = 3) -> E
         observed = _timestamp(record.observed_at) if record.observed_at else published
         if observed < published:
             raise ValueError("观察时间不能早于发布时间")
-        fingerprint = json.dumps(record.to_dict(), sort_keys=True)
-        if fingerprint in seen:
-            continue
-        seen.add(fingerprint)
+        if record.publication_id:
+            fingerprint = json.dumps(record.to_dict(), sort_keys=True)
+            if fingerprint in seen:
+                continue
+            seen.add(fingerprint)
         key = (
             record.platform,
             record.account_id,

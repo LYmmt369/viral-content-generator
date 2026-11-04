@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LYmmt369 内容生成与平台输出 CLI 4.1.3。"""
+"""LYmmt369 内容生成与平台输出 CLI 4.1.4。"""
 
 import argparse
 import json
@@ -348,7 +348,7 @@ class ViralContentCLI:
 def parse_arguments():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(
-        description="LYmmt369 内容生成器 4.1.3 - 生成并检查各平台稿件",
+        description="LYmmt369 内容生成器 4.1.4 - 生成并检查各平台稿件",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例用法:
@@ -442,7 +442,7 @@ def parse_arguments():
     # 工具参数
     parser.add_argument("--list-styles", action="store_true", help="列出所有可用风格")
 
-    parser.add_argument("--version", action="version", version="%(prog)s 4.1.3")
+    parser.add_argument("--version", action="version", version="%(prog)s 4.1.4")
 
     args = parser.parse_args()
     if args.topic and args.topic_option and args.topic != args.topic_option:

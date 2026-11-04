@@ -19,7 +19,7 @@ assert all(
     Path(m.__file__).resolve().is_relative_to(target)
     for m in (viral_content, viral_content_cli, viral_content_revision)
 )
-assert viral_content.__version__ == "4.1.3"
+assert viral_content.__version__ == "4.1.4"
 calls = []
 
 
@@ -62,4 +62,4 @@ with tempfile.TemporaryDirectory() as directory:
 summary = summarize_feedback([FeedbackRecord(0, "wechat", "2026-11-04", leads=2)])
 assert summary.metrics[0]["lead_rate"] is None
 assert summary.winner_index is None
-print("Installed 4.1.3: packaged configs, two platforms, exact undo and missing denominator passed")
+print("Installed 4.1.4: packaged configs, two platforms, exact undo and missing denominator passed")

@@ -4,7 +4,7 @@ v4.0 MVP 功能测试脚本
 验证核心功能是否正常工作
 
 作者: Sunnyeung
-版本: 4.1.3
+版本: 4.1.4
 """
 
 import sys
@@ -386,7 +386,7 @@ if __name__ == '__main__':
 
 def test_public_version_and_cli_entrypoint():
     import viral_content
-    assert viral_content.__version__ == '4.1.3'
+    assert viral_content.__version__ == '4.1.4'
     from viral_content_cli import main
     assert callable(main)
 

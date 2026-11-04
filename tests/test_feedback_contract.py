@@ -34,6 +34,13 @@ def test_same_candidate_different_publications_never_overwrite():
     assert result.winner_index is None
 
 
+def test_identical_legacy_records_without_publication_id_remain_distinct():
+    legacy = record(impressions=100, leads=2)
+    result = summarize_feedback([legacy, legacy])
+    assert result.sample_size == 2
+    assert len(result.metrics) == 2
+
+
 def test_latest_cumulative_snapshot_selected_without_adding(tmp_path):
     early = record(
         publication_id="post", observed_at="2026-11-04T01:00:00Z", impressions=100, leads=2

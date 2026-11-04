@@ -2,7 +2,7 @@
 name: LYmmt369-viral-article-generator
 description: 用用户提供的材料直接成稿，按明确改法局部修改已有稿件，输出差异并支持准确撤回。适用于文章、平台文案及稿件修订。
 metadata:
-  version: "4.1.3"
+  version: "4.1.4"
   author: LYmmt369
 ---
 

@@ -1,4 +1,4 @@
-# Viral Content Generator v4.1.3
+# Viral Content Generator v4.1.4
 
 **用自己的材料成稿，再按作者意图精准改好。**
 

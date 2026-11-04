@@ -16,7 +16,7 @@ def test_skill_source_and_packaged_copy_match_current_release():
     assert canonical == (ROOT / "viral_content/resources/skill.md").read_text(encoding="utf-8")
     meta = yaml.safe_load(canonical.split("---", 2)[1])
     assert meta["name"] == "LYmmt369-viral-article-generator"
-    assert meta["metadata"]["version"] == viral_content.__version__ == "4.1.3"
+    assert meta["metadata"]["version"] == viral_content.__version__ == "4.1.4"
     assert f'version = "{viral_content.__version__}"' in (ROOT / "pyproject.toml").read_text(
         encoding="utf-8"
     )
