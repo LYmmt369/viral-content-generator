@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LYmmt369 内容生成与平台输出 CLI 4.1.5。"""
+"""LYmmt369 内容生成与平台输出 CLI 4.1.6。"""
 
 import argparse
 import json
@@ -18,26 +18,13 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 # 导入核心引擎
 from viral_content.core import (
-    AccountFingerprint,
-    PromptCompiler,
     StyleMixer,
 )
-from viral_content.core.experiment import Candidate, CandidateRanker
-from viral_content.core.quality_gate import QualityGate
 
 # 导入生成器（复用v3.1）
 from viral_content.generators.factory import create_generator
 from viral_content.utils.observability import configure_json_logging
 
-# 配置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("viral_content_generator.log", encoding="utf-8"),
-        logging.StreamHandler(),
-    ],
-)
 logger = logging.getLogger(__name__)
 
 # 常量定义
@@ -59,7 +46,6 @@ CONTENT_PLATFORMS = {
 
 CONVERSION_GOALS = ["likes", "comments", "leads", "sales"]
 
-DEFAULT_MODEL = "claude-3-5-sonnet-20241022"
 DEFAULT_MAX_TOKENS = 8192
 DEFAULT_TEMPERATURE = 0.7
 
@@ -121,10 +107,6 @@ class HotTopicInput:
 
 class ViralContentCLI:
     """热点风格成交引擎CLI"""
-
-    def __init__(self):
-        self.compiler = PromptCompiler()
-        self.style_mixer = StyleMixer()
 
     def generate(
         self,
@@ -278,77 +260,11 @@ class ViralContentCLI:
 
         return results
 
-    def _quick_score(self, content: str, goal: str) -> float:
-        """快速评分
-
-        Args:
-            content: 内容
-            goal: 成交目标
-
-        Returns:
-            评分 (0-10)
-        """
-        # 简单的长度和结构评分
-        word_count = len(content)
-
-        if word_count < 100:
-            return 3.0
-        elif word_count < 300:
-            return 5.0
-        elif word_count < 800:
-            return 7.0
-        else:
-            return 8.0
-
-    def _save_output(
-        self,
-        content: str,
-        output_path: Path,
-        topic: str,
-        goal: str,
-        platform: str,
-        *,
-        experiment_id: str = "",
-        candidate_count: int = 1,
-    ):
-        """保存输出
-
-        Args:
-            content: 内容
-            output_path: 输出路径
-            topic: 话题
-            goal: 成交目标
-            platform: 平台
-        """
-        output_path = Path(output_path)
-
-        # 如果是目录，生成文件名
-        if output_path.is_dir():
-            timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-            filename = f"{goal}_{platform}_{timestamp}.md"
-            output_path = output_path / filename
-
-        # 确保目录存在
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        # 写入文件
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(f"# {topic}\n\n")
-            f.write(f"**实验 ID**: {experiment_id}\n")
-            f.write(f"**候选数量**: {candidate_count}\n")
-            f.write(f"**生成时间**: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}\n")
-            f.write(f"**成交目标**: {goal}\n")
-            f.write(f"**目标平台**: {platform}\n\n")
-            f.write("---\n\n")
-            f.write(content)
-
-        logger.info(f"内容已保存到: {output_path}")
-
 
 def parse_arguments():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(
-        description="LYmmt369 内容生成器 4.1.5 - 生成并检查各平台稿件",
+        description="LYmmt369 内容生成器 4.1.6 - 生成并检查各平台稿件",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例用法:
@@ -437,12 +353,10 @@ def parse_arguments():
 
     parser.add_argument("--stream", action="store_true", help="启用流式输出")
 
-    parser.add_argument("--score", action="store_true", help="启用内容评分")
-
     # 工具参数
     parser.add_argument("--list-styles", action="store_true", help="列出所有可用风格")
 
-    parser.add_argument("--version", action="version", version="%(prog)s 4.1.5")
+    parser.add_argument("--version", action="version", version="%(prog)s 4.1.6")
 
     args = parser.parse_args()
     if args.topic and args.topic_option and args.topic != args.topic_option:
@@ -454,10 +368,15 @@ def parse_arguments():
 
 
 def main():
-    request_id = configure_json_logging()
-    logger.info("request_started request_id=%s", request_id)
     """主函数"""
     args = parse_arguments()
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.StreamHandler()],
+    )
+    request_id = configure_json_logging()
+    logger.info("request_started request_id=%s", request_id)
 
     # 列出风格
     if args.list_styles:
@@ -503,7 +422,6 @@ def main():
             max_tokens=args.max_tokens,
             stream=args.stream,
             output_path=args.output,
-            enable_scoring=args.score,
             variants=args.variants,
         )
 
@@ -530,7 +448,6 @@ def main():
             stream=args.stream,
             output_path=args.output,
             variants=args.variants,
-            enable_scoring=args.score,
         )
 
         # 输出到stdout
@@ -541,8 +458,8 @@ def main():
 
         return 0
 
-    except Exception:
-        logger.exception("生成失败")
+    except Exception as error:  # noqa: BLE001 - CLI boundary reports a stable failure status
+        logger.error("生成失败: %s", type(error).__name__)
         return 1
 
 

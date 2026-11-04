@@ -2,7 +2,7 @@
 数据模型模块
 
 作者: Sunnyeung
-版本: 4.1.5
+版本: 4.1.6
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """

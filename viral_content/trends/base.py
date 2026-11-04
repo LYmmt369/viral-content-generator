@@ -3,14 +3,14 @@
 v4.0 - 热点情报引擎
 
 作者: Sunnyeung
-版本: 4.1.5
+版本: 4.1.6
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
@@ -61,7 +61,9 @@ class Trend:
     metrics: TrendMetrics | None = None  # 热度指标
     content_snippet: str | None = None  # 内容片段
     related_topics: list[str] = field(default_factory=list)  # 相关话题
-    created_at: datetime | None = field(default_factory=datetime.now)  # 抓取时间
+    created_at: datetime | None = field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )  # 抓取时间
 
     def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
@@ -91,6 +93,11 @@ class Trend:
         Returns:
             Trend实例
         """
+
+        def parse_datetime(value: str) -> datetime:
+            # Python 3.10 does not consistently accept the ISO-8601 Z suffix.
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+
         # 处理category
         category = data.get("category", "unknown")
         if isinstance(category, str):
@@ -108,9 +115,7 @@ class Trend:
                 discussion_count=metrics_data.get("讨论量", 0),
                 growth_rate=metrics_data.get("增长率", 0.0),
                 timestamp=(
-                    datetime.fromisoformat(metrics_data["时间戳"])
-                    if metrics_data.get("时间戳")
-                    else None
+                    parse_datetime(metrics_data["时间戳"]) if metrics_data.get("时间戳") else None
                 ),
             )
 
@@ -126,11 +131,7 @@ class Trend:
             content_snippet=data.get("content_snippet"),
             related_topics=data.get("related_topics", []),
             **(
-                {
-                    "created_at": (
-                        datetime.fromisoformat(data["created_at"]) if data["created_at"] else None
-                    )
-                }
+                {"created_at": (parse_datetime(data["created_at"]) if data["created_at"] else None)}
                 if "created_at" in data
                 else {}
             ),
@@ -186,6 +187,26 @@ class BaseTrendSource(ABC):
         """检查来源是否可用"""
         return True
 
+    @staticmethod
+    def validate_request(limit: int, category: str | TrendCategory | None) -> TrendCategory | None:
+        """Validate the shared fetch contract and normalize a category filter."""
+        if type(limit) is not int or limit < 1:
+            raise ValueError("limit 必须是正整数")
+        if category is None:
+            return None
+        if isinstance(category, TrendCategory):
+            return category
+        if not isinstance(category, str):
+            raise ValueError("category 必须是有效分类字符串")
+        try:
+            return TrendCategory(category)
+        except ValueError as error:
+            raise ValueError(f"未知分类: {category}") from error
+
+    @staticmethod
+    def category_matches(trend: Trend, category: TrendCategory | None) -> bool:
+        return category is None or trend.category == category
+
 
 class TrendAggregator:
     """热点聚合器
@@ -202,7 +223,11 @@ class TrendAggregator:
         self.sources = sources or []
 
     def fetch_all(
-        self, limit_per_source: int = 10, category: str | None = None
+        self,
+        limit_per_source: int = 10,
+        category: str | None = None,
+        *,
+        strict: bool = True,
     ) -> dict[str, list[Trend]]:
         """从所有来源获取热点
 
@@ -213,6 +238,7 @@ class TrendAggregator:
         Returns:
             按来源分组的热点字典
         """
+        BaseTrendSource.validate_request(limit_per_source, category)
         results = {}
 
         for source in self.sources:
@@ -222,10 +248,9 @@ class TrendAggregator:
                     results[source.get_source_name()] = trends
                 else:
                     results[source.get_source_name()] = []
-            except (
-                Exception
-            ) as e:  # noqa: BLE001 - normalize boundary errors for stable CLI/API behavior
-                print(f"获取{source.get_source_name()}热点失败: {e}")
+            except Exception as error:  # noqa: BLE001 - source plugins have varied errors
+                if strict:
+                    raise RuntimeError(f"获取{source.get_source_name()}热点失败") from error
                 results[source.get_source_name()] = []
 
         return results
@@ -240,13 +265,19 @@ class TrendAggregator:
         Returns:
             合并排序后的热点列表
         """
+        if type(limit) is not int or limit < 1:
+            raise ValueError("limit 必须是正整数")
+        if not isinstance(all_trends, dict):
+            raise ValueError("all_trends 必须是按来源分组的字典")
+
         # 收集所有热点
         merged = []
 
         for source_name, trends in all_trends.items():
             for trend in trends:
-                # 添加来源标记
-                trend.source = source_name
+                # Never erase explicit provenance such as sample: or a live API label.
+                if not trend.source:
+                    trend.source = source_name
                 merged.append(trend)
 
         # 按热度排序
@@ -268,7 +299,12 @@ class TrendAggregator:
         return unique
 
     def fetch_merged(
-        self, limit_per_source: int = 10, final_limit: int = 50, category: str | None = None
+        self,
+        limit_per_source: int = 10,
+        final_limit: int = 50,
+        category: str | None = None,
+        *,
+        strict: bool = True,
     ) -> list[Trend]:
         """获取并合并热点（便捷方法）
 
@@ -280,5 +316,5 @@ class TrendAggregator:
         Returns:
             合并排序后的热点列表
         """
-        all_trends = self.fetch_all(limit_per_source, category)
+        all_trends = self.fetch_all(limit_per_source, category, strict=strict)
         return self.merge_and_rank(all_trends, final_limit)

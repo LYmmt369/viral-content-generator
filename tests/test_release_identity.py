@@ -16,7 +16,7 @@ def test_skill_source_and_packaged_copy_match_current_release():
     assert canonical == (ROOT / "viral_content/resources/skill.md").read_text(encoding="utf-8")
     meta = yaml.safe_load(canonical.split("---", 2)[1])
     assert meta["name"] == "LYmmt369-viral-article-generator"
-    assert meta["metadata"]["version"] == viral_content.__version__ == "4.1.5"
+    assert meta["metadata"]["version"] == viral_content.__version__ == "4.1.6"
     assert f'version = "{viral_content.__version__}"' in (ROOT / "pyproject.toml").read_text(
         encoding="utf-8"
     )
@@ -28,8 +28,8 @@ def test_skill_source_and_packaged_copy_match_current_release():
 def test_repository_has_no_rejected_identity_or_unprefixed_skill_name():
     names = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0")
     rejected = (
-        "小跃" + "AI",
-        "StepFun" + " AI Team",
+        "\u5c0f\u8dc3" + "AI",
+        "Step" + "Fun AI Team",
         "github.com/Sunnyeung369/" + "viral-content-generator",
         "github.com:Sunnyeung369/" + "viral-content-generator",
     )

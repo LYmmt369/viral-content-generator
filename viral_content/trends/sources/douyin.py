@@ -3,12 +3,11 @@
 v4.0 - 从抖音获取热点话题
 
 作者: Sunnyeung
-版本: 4.1.5
+版本: 4.1.6
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """
 
-from datetime import datetime, timezone
 from typing import Any
 
 from ..base import BaseTrendSource, Trend, TrendCategory, TrendMetrics
@@ -39,12 +38,13 @@ class DouyinTrendSource(BaseTrendSource):
         Returns:
             热点列表
         """
+        requested_category = self.validate_request(limit, category)
         trends = []
 
         # 模拟抖音热点话题
         sample_trends = self._get_sample_trends()
 
-        for i, item in enumerate(sample_trends[:limit]):
+        for i, item in enumerate(sample_trends):
             trend = Trend(
                 id=f"sample_douyin_{i}",
                 topic=item["topic"],
@@ -62,7 +62,10 @@ class DouyinTrendSource(BaseTrendSource):
                 content_snippet=item.get("snippet"),
                 created_at=None,
             )
-            trends.append(trend)
+            if self.category_matches(trend, requested_category):
+                trends.append(trend)
+            if len(trends) >= limit:
+                break
 
         return trends
 
@@ -135,13 +138,13 @@ class DouyinTrendSource(BaseTrendSource):
 
         all_text = topic.lower() + " " + " ".join(hashtags).lower()
 
-        if any(kw in all_text for kw in tech_keywords):
+        if any(kw.lower() in all_text for kw in tech_keywords):
             return TrendCategory.TECH
-        elif any(kw in all_text for kw in business_keywords):
+        elif any(kw.lower() in all_text for kw in business_keywords):
             return TrendCategory.BUSINESS
-        elif any(kw in all_text for kw in education_keywords):
+        elif any(kw.lower() in all_text for kw in education_keywords):
             return TrendCategory.SOCIAL
-        elif any(kw in all_text for kw in lifestyle_keywords):
+        elif any(kw.lower() in all_text for kw in lifestyle_keywords):
             return TrendCategory.LIFESTYLE
         else:
             return TrendCategory.UNKNOWN

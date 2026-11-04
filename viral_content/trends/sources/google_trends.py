@@ -3,13 +3,14 @@ Google Trends 热点来源
 v4.0 - 从 Google Trends 获取热点
 
 作者: Sunnyeung
-版本: 4.1.5
+版本: 4.1.6
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """
 
 from datetime import datetime, timezone
 from typing import Any
+from urllib.parse import quote_plus
 
 from ..base import BaseTrendSource, Trend, TrendCategory, TrendMetrics
 
@@ -49,12 +50,13 @@ class GoogleTrendsSource(BaseTrendSource):
         """
         # 简化实现：返回模拟数据
         # 实际应用中应该调用 pytrends 或 Google Trends API
+        requested_category = self.validate_request(limit, category)
         trends = []
 
         # 模拟热点数据
         sample_trends = self._get_sample_trends()
 
-        for i, item in enumerate(sample_trends[:limit]):
+        for i, item in enumerate(sample_trends):
             trend = Trend(
                 id=f"sample_google_trends_{i}",
                 topic=item["topic"],
@@ -71,7 +73,10 @@ class GoogleTrendsSource(BaseTrendSource):
                 ),
                 created_at=None,
             )
-            trends.append(trend)
+            if self.category_matches(trend, requested_category):
+                trends.append(trend)
+            if len(trends) >= limit:
+                break
 
         return trends
 
@@ -135,13 +140,13 @@ class GoogleTrendsSource(BaseTrendSource):
 
         topic_lower = topic.lower()
 
-        if any(kw in topic_lower for kw in tech_keywords):
+        if any(kw.lower() in topic_lower for kw in tech_keywords):
             return TrendCategory.TECH
-        elif any(kw in topic_lower for kw in business_keywords):
+        elif any(kw.lower() in topic_lower for kw in business_keywords):
             return TrendCategory.BUSINESS
-        elif any(kw in topic_lower for kw in auto_keywords):
+        elif any(kw.lower() in topic_lower for kw in auto_keywords):
             return TrendCategory.BUSINESS  # 汽车归为商业
-        elif any(kw in topic_lower for kw in education_keywords):
+        elif any(kw.lower() in topic_lower for kw in education_keywords):
             return TrendCategory.SOCIAL
         else:
             return TrendCategory.UNKNOWN
@@ -158,9 +163,9 @@ class GoogleTrendsSource(BaseTrendSource):
         Returns:
             热点列表
         """
+        requested_category = self.validate_request(limit, category)
         if TrendReq is None:
-            print("pytrends 未安装，使用模拟数据")
-            return self.fetch(limit, category)
+            raise RuntimeError("pytrends 未安装，无法获取真实 Google Trends 数据")
 
         try:
 
@@ -169,33 +174,46 @@ class GoogleTrendsSource(BaseTrendSource):
             # 获取实时搜索趋势
             trending_searches = pytrends.trending_searches(pn=self.geo)
 
+            if trending_searches is None or getattr(trending_searches, "empty", True):
+                return []
+            if getattr(trending_searches, "shape", (0, 0))[1] < 1:
+                raise RuntimeError("Google Trends 返回的数据缺少话题列")
+
+            topics = trending_searches.iloc[:, 0].dropna().astype(str)
             trends = []
-            for i, (topic, score) in enumerate(trending_searches.head(limit).iterrows()):
+            now = datetime.now(timezone.utc)
+            for row_index, topic in enumerate(topics):
+                topic = topic.strip()
+                if not topic:
+                    continue
                 trend = Trend(
-                    id=f"gt_real_{datetime.now(timezone.utc).strftime('%Y%m%d')}_{i}",
+                    id=f"gt_real_{now.strftime('%Y%m%d')}_{row_index}",
                     topic=topic,
                     description="Google Trends 搜索趋势",
                     source="Google Trends (Real)",
-                    url=f"https://trends.google.com/trends/explore?q={topic}",
-                    category=TrendCategory.UNKNOWN,
+                    url=f"https://trends.google.com/trends/explore?q={quote_plus(topic)}",
+                    category=self._infer_category(topic),
                     keywords=[],
                     metrics=TrendMetrics(
-                        heat=int(score) if score else 50,
+                        # trending_searches only returns ranked terms, not a heat score.
+                        heat=0,
                         discussion_count=0,  # Google Trends 不提供讨论量
                         growth_rate=0.0,
-                        timestamp=datetime.now(timezone.utc),
+                        timestamp=now,
                     ),
-                    created_at=datetime.now(timezone.utc),
+                    created_at=now,
                 )
-                trends.append(trend)
+                if self.category_matches(trend, requested_category):
+                    trends.append(trend)
+                if len(trends) >= limit:
+                    break
 
             return trends
 
-        except (
-            Exception
-        ) as e:  # noqa: BLE001 - normalize boundary errors for stable CLI/API behavior
-            print(f"获取 Google Trends 失败: {e}")
-            return []
+        except RuntimeError:
+            raise
+        except Exception as error:  # noqa: BLE001 - normalize SDK/network errors
+            raise RuntimeError("获取真实 Google Trends 数据失败") from error
 
     def is_available(self) -> bool:
         """检查 Google Trends 是否可用"""

@@ -4,7 +4,7 @@
 # Core AI Libraries
 openai>=1.50.0             # OpenAI GPT API (gpt-4o support)
 anthropic>=0.40.0          # Claude API (claude-sonnet-4 support)
-google-generativeai>=0.8.0 # Gemini API (gemini-2.0 support)
+google-genai>=1.0.0        # Gemini API (current Google Gen AI SDK)
 
 # Utilities
 python-dotenv>=1.0.0       # Environment variable management

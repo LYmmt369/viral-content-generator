@@ -2,7 +2,7 @@
 常量定义
 
 作者: Sunnyeung
-版本: 4.1.5
+版本: 4.1.6
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """
@@ -42,7 +42,7 @@ PLATFORM_NAMES = {
 PLATFORM_DEFAULT_MODELS = {
     'openai': 'gpt-4o',
     'claude': 'claude-sonnet-4-20250514',
-    'gemini': 'gemini-2.0-flash-exp',
+    'gemini': 'gemini-3.8-flash',
     'local': 'local-model'
 }
 

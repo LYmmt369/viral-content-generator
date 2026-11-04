@@ -4,17 +4,18 @@ v4.0 MVP 功能测试脚本
 验证核心功能是否正常工作
 
 作者: Sunnyeung
-版本: 4.1.5
+版本: 4.1.6
 """
 
 import sys
 from pathlib import Path
 
 # 设置UTF-8编码输出（Windows兼容）
-if sys.platform == 'win32':
+if sys.platform == "win32":
     import codecs
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
+    sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
 
 # 添加项目根目录到路径
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -76,7 +77,7 @@ def test_style_loading():
         # 按分类统计
         by_category = {}
         for style in styles.values():
-            cat = style.get('category', 'unknown')
+            cat = style.get("category", "unknown")
             by_category[cat] = by_category.get(cat, 0) + 1
 
         print("[OK] 风格分类统计:")
@@ -158,6 +159,7 @@ def test_account_loading():
     except Exception as e:  # noqa: BLE001
         print(f"[FAIL] 账号加载测试失败: {e}\n")
         import traceback
+
         traceback.print_exc()
         raise AssertionError(str(e))
 
@@ -206,6 +208,7 @@ def test_prompt_compilation():
     except Exception as e:  # noqa: BLE001
         print(f"[FAIL] 提示词编译测试失败: {e}\n")
         import traceback
+
         traceback.print_exc()
         raise AssertionError(str(e))
 
@@ -230,7 +233,9 @@ def test_conversion_funnel():
             print(f"  - 质量标准: {len(standards)} 项")
 
             outline = funnel.generate_content_outline(1000)
-            print(f"  - 内容结构: 开头{outline['开头']}字, 主体{outline['主体']}字, 结尾{outline['结尾']}字")
+            print(
+                f"  - 内容结构: 开头{outline['开头']}字, 主体{outline['主体']}字, 结尾{outline['结尾']}字"
+            )
 
         print("\n[PASS] 成交漏斗测试通过\n")
         return
@@ -238,6 +243,7 @@ def test_conversion_funnel():
     except Exception as e:  # noqa: BLE001
         print(f"[FAIL] 成交漏斗测试失败: {e}\n")
         import traceback
+
         traceback.print_exc()
         raise AssertionError(str(e))
 
@@ -261,6 +267,7 @@ def test_hot_topic_input():
     except Exception as e:  # noqa: BLE001
         print(f"[FAIL] 热点输入测试失败: {e}\n")
         import traceback
+
         traceback.print_exc()
         raise AssertionError(str(e))
 
@@ -288,10 +295,10 @@ def test_integration():
         print("[OK] 核心组件初始化成功")
 
         print("\n2. 加载风格并混合...")
-        mixed_style = mixer.mix_styles([
-            "tech_explainer_global",
-            "business_savage_china"
-        ], weights={"tech_explainer_global": 0.6, "business_savage_china": 0.4})
+        mixed_style = mixer.mix_styles(
+            ["tech_explainer_global", "business_savage_china"],
+            weights={"tech_explainer_global": 0.6, "business_savage_china": 0.4},
+        )
         print(f"[OK] 风格混合成功: {mixed_style.get('component_styles', [])}")
 
         print("\n3. 构建完整系统提示词...")
@@ -328,6 +335,7 @@ def test_integration():
     except Exception as e:  # noqa: BLE001
         print(f"\n[FAIL] 集成测试失败: {e}")
         import traceback
+
         traceback.print_exc()
         raise AssertionError(str(e))
 
@@ -380,76 +388,89 @@ def main():
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())
 
 
 def test_public_version_and_cli_entrypoint():
     import viral_content
-    assert viral_content.__version__ == '4.1.5'
-    from viral_content_cli import main
-    assert callable(main)
 
+    assert viral_content.__version__ == "4.1.6"
+    from viral_content_cli import main
+
+    assert callable(main)
 
 
 def test_quality_gate_blocks_risky_copy():
     from viral_content.core.quality_gate import QualityGate
+
     gate = QualityGate()
-    result = gate.check('保证爆款，点击领取 [优惠内容]', require_cta=True)
+    result = gate.check("保证爆款，点击领取 [优惠内容]", require_cta=True)
     assert not result.passed
     assert len(result.warnings) >= 2
 
 
 def test_quality_gate_accepts_reviewable_copy():
     from viral_content.core.quality_gate import QualityGate
-    result = QualityGate().check('This concrete explanation covers a real scenario, limits, and actionable steps for small business owners. Leave a question in the comments and I will add a sourced example so you can judge whether it fits your situation.', require_cta=True)
+
+    result = QualityGate().check(
+        "This concrete explanation covers a real scenario, limits, and actionable steps for small business owners. Leave a question in the comments and I will add a sourced example so you can judge whether it fits your situation.",
+        require_cta=True,
+    )
     assert result.passed
     assert result.warnings == []
 
 
-
 def test_candidate_ranker_prefers_safe_candidate():
     from viral_content.core.experiment import Candidate, CandidateRanker
-    ranked = CandidateRanker('leads').rank([Candidate('unsafe', 9, False), Candidate('safe', 7, True)])
-    assert ranked[0].content == 'safe'
+
+    ranked = CandidateRanker("leads").rank(
+        [Candidate("unsafe", 9, False), Candidate("safe", 7, True)]
+    )
+    assert ranked[0].content == "safe"
 
 
 def test_feedback_record_serializes():
     from viral_content.core.experiment import FeedbackRecord
-    record = FeedbackRecord(1, 'xiaohongshu', '2026-09-15', impressions=100)
-    assert record.to_dict()['impressions'] == 100
 
+    record = FeedbackRecord(1, "xiaohongshu", "2026-09-15", impressions=100)
+    assert record.to_dict()["impressions"] == 100
 
 
 def test_feedback_summary_warns_on_small_sample():
     from viral_content.core.experiment import FeedbackRecord, summarize_feedback
-    summary = summarize_feedback([FeedbackRecord(0, 'douyin', '2026-09-15', impressions=100, comments=5)])
+
+    summary = summarize_feedback(
+        [FeedbackRecord(0, "douyin", "2026-09-15", impressions=100, comments=5)]
+    )
     assert summary.winner_index is None
     assert not summary.reliable
-    assert '样本量' in summary.note
-
+    assert "样本量" in summary.note
 
 
 def test_platform_bias_changes_ranker_weights():
     from viral_content.core.experiment import CandidateRanker
-    assert CandidateRanker('likes', 'douyin').quality_weight > CandidateRanker('likes', 'zhihu').quality_weight
 
+    assert (
+        CandidateRanker("likes", "douyin").quality_weight
+        > CandidateRanker("likes", "zhihu").quality_weight
+    )
 
 
 def test_ranker_describes_weights():
     from viral_content.core.experiment import CandidateRanker
-    info = CandidateRanker('leads', 'douyin').describe()
-    assert info['goal'] == 'leads'
-    assert info['quality_weight'] + info['gate_weight'] == 1.0
 
+    info = CandidateRanker("leads", "douyin").describe()
+    assert info["goal"] == "leads"
+    assert info["quality_weight"] + info["gate_weight"] == 1.0
 
 
 def test_feedback_report_exports_json(tmp_path):
     from viral_content.core.experiment import FeedbackRecord, export_feedback_report
-    path = tmp_path / 'report.json'
-    export_feedback_report([FeedbackRecord(0, 'wechat', '2026-09-15', views=100)], str(path))
-    assert 'summary' in path.read_text(encoding='utf-8')
 
+    path = tmp_path / "report.json"
+    export_feedback_report([FeedbackRecord(0, "wechat", "2026-09-15", views=100)], str(path))
+    assert "summary" in path.read_text(encoding="utf-8")
 
 
 def test_installed_resource_paths_exist():
@@ -458,6 +479,7 @@ def test_installed_resource_paths_exist():
         SKILL_FALLBACK_PATH,
         STYLES_DIR,
     )
+
     assert SKILL_FALLBACK_PATH.is_file()
     assert (PROMPTS_DIR / "base_system.md").is_file()
     assert any(STYLES_DIR.glob("*.yaml"))

@@ -6,7 +6,7 @@ import threading
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from types import SimpleNamespace
-from unittest.mock import create_autospec, patch
+from unittest.mock import MagicMock, patch
 
 from viral_content_drafting import _generate_text, revise_from_instruction
 from viral_content_revision import RevisionError
@@ -156,16 +156,18 @@ class ProviderHTTPContracts(unittest.TestCase):
 
 class GeminiSDKContract(unittest.TestCase):
     def test_direct_prompts_timeout_and_no_retry_match_the_installed_sdk(self):
-        import google.generativeai as genai
+        from google import genai
+        from google.genai import types
 
-        client = create_autospec(genai.GenerativeModel, instance=True)
-        client.generate_content.return_value = SimpleNamespace(
-            text="# 完整稿件", candidates=[SimpleNamespace(finish_reason=1)]
+        client = MagicMock()
+        client.models.generate_content.return_value = SimpleNamespace(
+            text="# 完整稿件",
+            candidates=[SimpleNamespace(finish_reason=types.FinishReason.STOP)],
+            usage_metadata=SimpleNamespace(total_token_count=9),
         )
         with (
             patch.dict(os.environ, {"GOOGLE_API_KEY": "test-only", "VIRAL_API_KEY": ""}),
-            patch.object(genai, "configure", autospec=True),
-            patch.object(genai, "GenerativeModel", return_value=client) as model,
+            patch.object(genai, "Client", return_value=client) as client_factory,
             patch(
                 "viral_content.generators.base.load_skill",
                 side_effect=AssertionError("legacy Skill must not be loaded"),
@@ -180,12 +182,15 @@ class GeminiSDKContract(unittest.TestCase):
                 timeout=5.0,
             )
         self.assertEqual(text, "# 完整稿件")
-        self.assertEqual(model.call_args.kwargs["system_instruction"], "direct system")
-        client.generate_content.assert_called_once_with(
-            "direct user",
-            generation_config={"max_output_tokens": 512},
-            request_options={"timeout": 5.0, "retry": None},
-        )
+        options = client_factory.call_args.kwargs["http_options"]
+        self.assertEqual(options.timeout, 5000)
+        self.assertEqual(options.retry_options.attempts, 1)
+        call = client.models.generate_content.call_args.kwargs
+        self.assertEqual(call["model"], "fixture")
+        self.assertEqual(call["contents"], "direct user")
+        self.assertEqual(call["config"].system_instruction, "direct system")
+        self.assertEqual(call["config"].max_output_tokens, 512)
+        client.close.assert_called_once()
 
 
 if __name__ == "__main__":

@@ -65,6 +65,51 @@ def test_batch_failure_is_explicit_not_partial_success():
         )
 
 
+def test_batch_validates_every_item_before_starting_model_calls():
+    calls = []
+    with pytest.raises(Exception, match=r"trends\[1\]"):
+        ViralContentPipeline().run_batch(
+            [{"topic": "有效"}, {"description": "  "}],
+            generator_factory=factory_log(calls),
+        )
+    assert calls == []
+
+
+def test_batch_accepts_documented_description_fallback():
+    calls = []
+    result = ViralContentPipeline().run_batch(
+        [{"description": "描述主题"}], generator_factory=factory_log(calls)
+    )
+    assert len(result) == len(calls) == 1
+    assert calls[0].topic == "描述主题"
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"max_tokens": 0},
+        {"max_attempts": 0},
+        {"timeout": float("inf")},
+        {"temperature": float("nan")},
+        {"temperature": 2.1},
+        {"timeout": True},
+        {"enable_scoring": True},
+    ],
+)
+def test_invalid_or_unimplemented_generation_options_fail_before_client_setup(overrides):
+    calls = []
+    config = GenerationConfig(topic="案例", **overrides)
+    with pytest.raises(Exception):
+        ViralContentPipeline().run("案例", config=config, generator_factory=factory_log(calls))
+    assert calls == []
+
+
+def test_invalid_generator_result_has_a_stable_boundary_error():
+    factory = lambda config: SimpleNamespace(config=config, generate=lambda: None)
+    with pytest.raises(Exception, match="GenerationResult"):
+        ViralContentPipeline().run("案例", generator_factory=factory)
+
+
 def test_call_does_not_mutate_shared_generation_config():
     config = GenerationConfig(topic="original", content_platforms=["douyin"])
     ViralContentPipeline().run("案例", config=config, generator_factory=factory_log([]))

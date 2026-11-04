@@ -165,6 +165,15 @@ def _read_text(path: Path) -> str:
     return path.read_bytes().decode("utf-8")
 
 
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise RevisionError(f"record JSON contains duplicate field: {key}")
+        result[key] = value
+    return result
+
+
 def _check_output_paths(paths: list[Path], inputs: list[Path]) -> None:
     targets = [path.resolve() for path in paths]
     if len(set(targets)) != len(targets) or set(targets) & {p.resolve() for p in inputs}:
@@ -174,17 +183,28 @@ def _check_output_paths(paths: list[Path], inputs: list[Path]) -> None:
 
 
 def _write_new_files(files: dict[Path, str], inputs: list[Path]) -> None:
+    # Encode everything before creating directories or files, so invalid text cannot
+    # leave a partial output set behind.
+    encoded = {path: content.encode("utf-8") for path, content in files.items()}
     _check_output_paths(list(files), inputs)
     created = []
     try:
-        for path, content in files.items():
+        for path, content in encoded.items():
             path.parent.mkdir(parents=True, exist_ok=True)
             with path.open("xb") as handle:
                 created.append(path)
-                handle.write(content.encode("utf-8"))
-    except (OSError, UnicodeError, TypeError):
+                handle.write(content)
+    except OSError as error:
+        rollback_failures = []
         for path in reversed(created):
-            path.unlink()
+            try:
+                path.unlink()
+            except OSError:
+                rollback_failures.append(str(path))
+        if rollback_failures:
+            raise RevisionError(
+                "write failed and rollback could not remove: " + ", ".join(rollback_failures)
+            ) from error
         raise
 
 
@@ -194,7 +214,7 @@ def main(
     parser = argparse.ArgumentParser(
         description="Draft from materials or make exact edits. No Skill routing or interactive questions."
     )
-    parser.add_argument("--version", action="version", version="%(prog)s 4.1.5")
+    parser.add_argument("--version", action="version", version="%(prog)s 4.1.6")
     commands = parser.add_subparsers(dest="command", required=True)
     identify = commands.add_parser("fingerprint", help="print the exact manuscript version")
     identify.add_argument("manuscript", type=Path)
@@ -295,7 +315,10 @@ def main(
             _write_new_files(files, [args.manuscript])
             print(json.dumps(summary))
             return 0
-        record = json.loads(args.record.read_bytes().decode("utf-8-sig"))
+        record = json.loads(
+            args.record.read_bytes().decode("utf-8-sig"),
+            object_pairs_hook=_unique_json_object,
+        )
         if args.command == "apply":
             result = apply_revision(text, record)
             receipt_path = args.output.with_name(args.output.name + ".receipt.json")

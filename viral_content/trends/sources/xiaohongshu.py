@@ -3,12 +3,11 @@
 v4.0 - 从小红书获取热点话题
 
 作者: Sunnyeung
-版本: 4.1.5
+版本: 4.1.6
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """
 
-from datetime import datetime, timezone
 from typing import Any
 
 from ..base import BaseTrendSource, Trend, TrendCategory, TrendMetrics
@@ -39,12 +38,13 @@ class XiaohongshuTrendSource(BaseTrendSource):
         Returns:
             热点列表
         """
+        requested_category = self.validate_request(limit, category)
         trends = []
 
         # 模拟小红书热点话题
         sample_trends = self._get_sample_trends()
 
-        for i, item in enumerate(sample_trends[:limit]):
+        for i, item in enumerate(sample_trends):
             trend = Trend(
                 id=f"sample_xiaohongshu_{i}",
                 topic=item["topic"],
@@ -62,7 +62,10 @@ class XiaohongshuTrendSource(BaseTrendSource):
                 content_snippet=item.get("snippet"),
                 created_at=None,
             )
-            trends.append(trend)
+            if self.category_matches(trend, requested_category):
+                trends.append(trend)
+            if len(trends) >= limit:
+                break
 
         return trends
 
@@ -137,13 +140,13 @@ class XiaohongshuTrendSource(BaseTrendSource):
         all_text = topic.lower() + " " + " ".join(tags).lower()
 
         if (
-            any(kw in all_text for kw in fashion_keywords)
-            or any(kw in all_text for kw in beauty_keywords)
-            or any(kw in all_text for kw in lifestyle_keywords)
-            or any(kw in all_text for kw in food_keywords)
+            any(kw.lower() in all_text for kw in fashion_keywords)
+            or any(kw.lower() in all_text for kw in beauty_keywords)
+            or any(kw.lower() in all_text for kw in lifestyle_keywords)
+            or any(kw.lower() in all_text for kw in food_keywords)
         ):
             return TrendCategory.LIFESTYLE
-        elif any(kw in all_text for kw in work_keywords):
+        elif any(kw.lower() in all_text for kw in work_keywords):
             return TrendCategory.BUSINESS
         else:
             return TrendCategory.UNKNOWN

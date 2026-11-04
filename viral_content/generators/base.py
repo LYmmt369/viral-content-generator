@@ -2,7 +2,7 @@
 内容生成器抽象基类
 
 作者: Sunnyeung
-版本: 4.1.5
+版本: 4.1.6
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """
@@ -29,7 +29,9 @@ class ContentGenerator(ABC):
 
     def __init__(self, config: GenerationConfig):
         self.config = config
-        self.skill_content = config.system_prompt if config.system_prompt is not None else load_skill()
+        self.skill_content = (
+            config.system_prompt if config.system_prompt is not None else load_skill()
+        )
         self._client = None
         self._setup_client()
 
@@ -50,10 +52,11 @@ class ContentGenerator(ABC):
         """构建提示词（基础版本，v4.0 将由 PromptCompiler 替代）"""
         if self.config.user_prompt is not None:
             return self.config.user_prompt
-        return (f"请根据已提供的材料，以{self.config.style}写作关于「{self.config.topic}」的文章，"
-                f"目标长度约{self.config.word_count}字。保留事实边界，缺少依据时标明待核实；"
-                "直接输出稿件，不编造经历、数据和来源。")
-
+        return (
+            f"请根据已提供的材料，以{self.config.style}写作关于「{self.config.topic}」的文章，"
+            f"目标长度约{self.config.word_count}字。保留事实边界，缺少依据时标明待核实；"
+            "直接输出稿件，不编造经历、数据和来源。"
+        )
 
     def generate(self) -> GenerationResult:
         """
@@ -92,10 +95,10 @@ class ContentGenerator(ABC):
                 if attempts == 1:
                     raise APIError(f"{self.PLATFORM_NAME} request failed") from e
                 if attempt < attempts - 1:
-                    wait_time = RETRY_DELAY * (2 ** attempt)  # 指数退避
-                    logger.warning(f"API调用失败，{wait_time}秒后重试: {e}")
+                    wait_time = RETRY_DELAY * (2**attempt)  # 指数退避
+                    logger.warning("API调用失败，%s秒后重试", wait_time)
                     time.sleep(wait_time)
                 else:
-                    logger.error(f"API调用失败，已达最大重试次数: {e}")
+                    logger.error("API调用失败，已达最大重试次数")
 
-        raise APIError(f"{self.PLATFORM_NAME} API调用失败: {last_error}")
+        raise APIError(f"{self.PLATFORM_NAME} API调用失败") from last_error

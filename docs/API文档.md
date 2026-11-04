@@ -1,4 +1,4 @@
-# LYmmt369 Viral Content Generator 4.1.5 API
+# LYmmt369 Viral Content Generator 4.1.6 API
 
 安装：在仓库根目录运行 `pip install .`。模型调用需要对应环境变量密钥。下列 YOUR_MODEL 替换为账号可用模型。
 
@@ -20,7 +20,7 @@ print(result.content)
 
 account 和 offer 可为 YAML 路径、配置字典或对应数据模型；省略则不注入。style_mix 可为逗号分隔的风格 ID 或列表。配置所有字段进入提示词，这不保证模型服从所有限制。未知风格、平台、无效配置和全部候选失败会抛出异常。
 
-`GenerationConfig` 的 platform 是模型提供方，run 的 platform 是内容平台。variants 范围 1–8。截断或检查失败的候选不交付。选择依据只是长度参考，不预测内容价值或发布效果。
+`GenerationConfig` 的 platform 是模型提供方，run 的 platform 是内容平台。variants 范围 1–8。截断或检查失败的候选不交付。选择依据只是长度参考，不预测内容价值或发布效果。`enable_scoring=True` 会明确报错；当前没有把启发式规则冒充质量分。
 
 ## 多平台
 
@@ -57,4 +57,4 @@ CLI 与 Python API 使用同一生成与检查流程。目录输出各平台独�
 
 ## 趋势源
 
-抖音、小红书、TikTok 及 Google Trends 的 `fetch()` 当前返回内置示例，`source` 以 `sample:` 开头，`created_at` 和指标时间为 null。示例不能作为实时热点或真实表现数据。Google Trends 的可选 `fetch_real_trends()` 单独依赖 pytrends；依赖缺失时会明确提示并返回已标记的示例。
+抖音、小红书、TikTok 及 Google Trends 的 `fetch()` 当前返回内置示例，`source` 以 `sample:` 开头，`created_at` 和指标时间为 null。示例不能作为实时热点或真实表现数据。四个来源的 `category` 会实际过滤，`limit` 必须为正整数。聚合器保留每条数据原有的 `sample:` 或真实接口来源；来源失败默认抛出异常，不与“无结果”混淆，需要容错汇总时显式传入 `strict=False`。Google Trends 的可选 `fetch_real_trends()` 单独依赖 pytrends；依赖缺失或请求失败时抛出异常，不回退成示例数据。该接口只把返回顺序当作排序，不虚构 Google 没提供的热度分。

@@ -63,7 +63,7 @@ class DirectDraftingContracts(unittest.TestCase):
                     text,
                     "改正文",
                     protected=["数据5人。"],
-                    generate=lambda *_: json.dumps(response),
+                    generate=lambda *_, response=response: json.dumps(response),
                 )
 
     def test_accepts_a_single_json_fence_but_rejects_prose_or_incomplete_json(self):

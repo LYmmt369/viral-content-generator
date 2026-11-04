@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "viral-content-generator"
-version = "4.1.5"
+version = "4.1.6"
 description = "材料成稿与精准改稿：保护原句、保留未改内容、记录差异并准确撤回"
 readme = "README.md"
 license = "MIT"
@@ -39,7 +39,7 @@ classifiers = [
 dependencies = [
     "openai>=1.50.0",
     "anthropic>=0.40.0",
-    "google-generativeai>=0.8.0",
+    "google-genai>=1.0.0",
     "python-dotenv>=1.0.0",
     "pyyaml>=6.0",
 ]

@@ -1,4 +1,4 @@
-> 历史资料：以下命令、版本和验收结论不代表当前 4.1.5。当前使用说明见 [README](README.md)。
+> 历史资料：以下命令、版本和验收结论不代表当前 4.1.6。当前使用说明见 [README](README.md)。
 
 # GitHub发布准备清单
 
@@ -22,7 +22,7 @@
 
 **你需要提供：**
 1. GitHub用户名
-2. 仓库名（如：viral-article-skill）
+2. 仓库名（如：viral-content-generator）
 3. GitHub Token（或让我用浏览器登录）
 
 **我会执行：**
@@ -43,7 +43,7 @@ git push -u origin main
 
 1. **在GitHub创建新仓库**
    - 访问 https://github.com/new
-   - 仓库名：`viral-article-skill`
+   - 仓库名：`viral-content-generator`
    - 描述：`🚀 高级爆款博文生成器 - 支持8种风格的AI写作助手`
    - 选择Public
    - 不要勾选"Initialize with README"（我们已经有了）
@@ -67,7 +67,7 @@ git push -u origin main
 3. **关联远程仓库**
    ```bash
    # 替换成你的GitHub用户名
-   git remote add origin https://github.com/你的用户名/viral-article-skill.git
+   git remote add origin https://github.com/你的用户名/viral-content-generator.git
 
    # 推送
    git branch -M main
@@ -162,7 +162,7 @@ google-generativeai>=0.3.0
 ![Version](https://img.shields.io/badge/version-2.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Python](https://img.shields.io/badge/python-3.8+-blue)
-![Stars](https://img.shields.io/github/stars/你的用户名/viral-article-skill)
+![Stars](https://img.shields.io/github/stars/你的用户名/viral-content-generator)
 ```
 
 ### 2. 添加Topics
@@ -198,7 +198,7 @@ google-generativeai>=0.3.0
 🎯 场景化模板
 🔧 支持Claude/GPT/Gemini
 
-GitHub: https://github.com/你的用户名/viral-article-skill
+GitHub: https://github.com/你的用户名/viral-content-generator
 
 #AI #写作 #开源
 ```
@@ -256,7 +256,7 @@ GitHub: [链接]
 **现在告诉我：**
 
 1. **你的GitHub用户名是什么？**
-2. **你想用什么仓库名？**（建议：viral-article-skill）
+2. **你想用什么仓库名？**（建议：viral-content-generator）
 3. **你想让我：**
    - A. 帮你自动发布（需要Token或浏览器登录）
    - B. 生成完整的发布命令，你手动执行

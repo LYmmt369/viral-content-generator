@@ -1,5 +1,6 @@
 """Shared configured generation service for Python and command-line callers."""
 
+import math
 from dataclasses import asdict, is_dataclass, replace
 from pathlib import Path
 from typing import Any
@@ -62,6 +63,12 @@ class ViralContentPipeline:
                 if isinstance(style_mix, str)
                 else style_mix
             )
+            if (
+                not isinstance(ids, list)
+                or not ids
+                or any(not isinstance(style_id, str) or not style_id for style_id in ids)
+            ):
+                raise ValidationError("style_mix 必须包含至少一个非空风格 ID")
             for style_id in ids:
                 if not self.style_mixer.get_style(style_id):
                     raise ValidationError(f"未知风格: {style_id}")
@@ -92,8 +99,14 @@ class ViralContentPipeline:
                 trend_data, ensure_ascii=False, default=encode
             )
         base = config or GenerationConfig(**{**self.config, "topic": topic})
+        if not isinstance(base, GenerationConfig):
+            raise ValidationError("config 必须是 GenerationConfig")
         if base.stream:
             raise ValidationError("检查通过前不输出流式草稿，请关闭 stream")
+        if base.enable_scoring:
+            raise ValidationError(
+                "自动评分未实现；请关闭 enable_scoring，避免把长度启发式当成质量分"
+            )
         task = replace(
             base,
             topic=topic,
@@ -104,6 +117,22 @@ class ViralContentPipeline:
         )
         if type(task.variants) is not int or not 1 <= task.variants <= 8:
             raise ValidationError("variants 必须在 1 到 8 之间")
+        if type(task.max_tokens) is not int or task.max_tokens < 1:
+            raise ValidationError("max_tokens 必须是正整数")
+        if type(task.max_attempts) is not int or task.max_attempts < 1:
+            raise ValidationError("max_attempts 必须是正整数")
+        if (
+            type(task.timeout) not in (int, float)
+            or not math.isfinite(task.timeout)
+            or task.timeout <= 0
+        ):
+            raise ValidationError("timeout 必须是有限正数")
+        if (
+            type(task.temperature) not in (int, float)
+            or not math.isfinite(task.temperature)
+            or not 0 <= task.temperature <= 2
+        ):
+            raise ValidationError("temperature 必须是 0 到 2 之间的有限数")
         factory = generator_factory or create_generator
         generator = factory(config=task)
         accepted = []
@@ -112,6 +141,12 @@ class ViralContentPipeline:
                 f"请为{platform}撰写关于「{topic}」的完整内容。" + f"\n候选编号：{index + 1}"
             )
             result = generator.generate()
+            if not isinstance(result, GenerationResult):
+                raise GenerationError("生成器必须返回 GenerationResult")
+            if not isinstance(result.content, str) or not result.content.strip():
+                raise GenerationError("模型未返回可检查的文本")
+            if not isinstance(result.metadata, dict):
+                raise GenerationError("生成结果 metadata 必须是字典")
             if result.truncated:
                 continue
             gate = QualityGate().check(result.content, require_cta=goal in {"leads", "sales"})
@@ -143,9 +178,18 @@ class ViralContentPipeline:
         targets = [Platform(p).value for p in (platforms or ["wechat"])]
         if len(set(targets)) != len(targets):
             raise ValidationError("平台不能重复")
+        normalized = []
+        for index, trend in enumerate(trends):
+            if isinstance(trend, dict):
+                topic = trend.get("topic") or trend.get("description")
+            else:
+                topic = getattr(trend, "topic", None)
+            if not isinstance(topic, str) or not topic.strip():
+                raise ValidationError(f"trends[{index}] 缺少非空 topic 或 description")
+            normalized.append((trend, topic.strip()))
+
         results = []
-        for trend in trends:
-            topic = trend.get("topic") if isinstance(trend, dict) else trend.topic
+        for trend, topic in normalized:
             for platform in targets:
                 results.append(
                     self.run(
