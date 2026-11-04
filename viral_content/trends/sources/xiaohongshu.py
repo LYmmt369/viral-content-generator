@@ -3,7 +3,7 @@
 v4.0 - 从小红书获取热点话题
 
 作者: Sunnyeung
-版本: 4.1.1
+版本: 4.1.3
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """
@@ -29,11 +29,7 @@ class XiaohongshuTrendSource(BaseTrendSource):
         """
         super().__init__("小红书", config)
 
-    def fetch(
-        self,
-        limit: int = 20,
-        category: str | None = None
-    ) -> list[Trend]:
+    def fetch(self, limit: int = 20, category: str | None = None) -> list[Trend]:
         """获取小红书热点话题
 
         Args:
@@ -50,10 +46,10 @@ class XiaohongshuTrendSource(BaseTrendSource):
 
         for i, item in enumerate(sample_trends[:limit]):
             trend = Trend(
-                id=f"xhs_{datetime.now(timezone.utc).strftime('%Y%m%d')}_{i}",
+                id=f"sample_xiaohongshu_{i}",
                 topic=item["topic"],
                 description=item.get("description", ""),
-                source="小红书",
+                source="sample:小红书",
                 url=item.get("url", ""),
                 category=self._infer_category(item["topic"], item.get("tags", [])),
                 keywords=item.get("tags", []),
@@ -61,10 +57,10 @@ class XiaohongshuTrendSource(BaseTrendSource):
                     heat=item.get("likes", 0) // 1000,  # 将点赞数转换为热度
                     discussion_count=item.get("comments", 0) + item.get("collects", 0),
                     growth_rate=item.get("growth", 0.0),
-                    timestamp=datetime.now(timezone.utc)
+                    timestamp=None,
                 ),
                 content_snippet=item.get("snippet"),
-                created_at=datetime.now(timezone.utc)
+                created_at=None,
             )
             trends.append(trend)
 
@@ -82,7 +78,7 @@ class XiaohongshuTrendSource(BaseTrendSource):
                 "comments": 5000,
                 "collects": 20000,
                 "growth": 15.0,
-                "snippet": "姐妹们，2026年最火的穿搭风格来了..."
+                "snippet": "姐妹们，2026年最火的穿搭风格来了...",
             },
             {
                 "topic": "平价好物分享",
@@ -93,7 +89,7 @@ class XiaohongshuTrendSource(BaseTrendSource):
                 "comments": 4000,
                 "collects": 15000,
                 "growth": 12.0,
-                "snippet": "挖到宝了！这些平价好物真的绝绝子..."
+                "snippet": "挖到宝了！这些平价好物真的绝绝子...",
             },
             {
                 "topic": "减脂食谱一周不重样",
@@ -104,7 +100,7 @@ class XiaohongshuTrendSource(BaseTrendSource):
                 "comments": 6000,
                 "collects": 30000,
                 "growth": 20.0,
-                "snippet": "一周减脂食谱，好吃不胖掉秤快..."
+                "snippet": "一周减脂食谱，好吃不胖掉秤快...",
             },
             {
                 "topic": "独居生活好物推荐",
@@ -115,7 +111,7 @@ class XiaohongshuTrendSource(BaseTrendSource):
                 "comments": 4500,
                 "collects": 18000,
                 "growth": 10.0,
-                "snippet": "独居女孩提升幸福感的10件好物..."
+                "snippet": "独居女孩提升幸福感的10件好物...",
             },
             {
                 "topic": "职场通勤穿搭",
@@ -126,7 +122,7 @@ class XiaohongshuTrendSource(BaseTrendSource):
                 "comments": 3500,
                 "collects": 12000,
                 "growth": 8.0,
-                "snippet": "职场通勤穿搭，得体又时尚..."
+                "snippet": "职场通勤穿搭，得体又时尚...",
             },
         ]
 
@@ -140,7 +136,12 @@ class XiaohongshuTrendSource(BaseTrendSource):
 
         all_text = topic.lower() + " " + " ".join(tags).lower()
 
-        if any(kw in all_text for kw in fashion_keywords) or any(kw in all_text for kw in beauty_keywords) or any(kw in all_text for kw in lifestyle_keywords) or any(kw in all_text for kw in food_keywords):
+        if (
+            any(kw in all_text for kw in fashion_keywords)
+            or any(kw in all_text for kw in beauty_keywords)
+            or any(kw in all_text for kw in lifestyle_keywords)
+            or any(kw in all_text for kw in food_keywords)
+        ):
             return TrendCategory.LIFESTYLE
         elif any(kw in all_text for kw in work_keywords):
             return TrendCategory.BUSINESS

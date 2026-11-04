@@ -1,4 +1,4 @@
-# Viral Content Generator v4.1.2
+# Viral Content Generator v4.1.3
 
 **Draft from your own materials, then make exact, reversible edits.**
 
@@ -64,3 +64,5 @@ MIT License.
 ## Configured multi-platform generation
 
 `viral-content --topic "Case study" --platform wechat xiaohongshu --ai-platform openai --model YOUR_MODEL --output drafts/` produces separate checked manuscripts. The CLI shares the Python pipeline. All requested platforms must pass before files are written. Existing files are never overwritten. Streaming is not supported by the checked workflow. See [API](docs/API文档.md), [Skill](SKILL.md), and [feedback semantics](docs/feedback.md).
+
+The legacy Douyin, Xiaohongshu, TikTok and Google Trends `fetch()` methods return labeled sample data, not live platform observations.

@@ -3,7 +3,7 @@
 v4.0 - 评分热点与账号的匹配度
 
 作者: Sunnyeung
-版本: 4.1.1
+版本: 4.1.3
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """

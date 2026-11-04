@@ -2,7 +2,7 @@
 账号指纹数据模型
 
 作者: Sunnyeung
-版本: 4.1.1
+版本: 4.1.3
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """

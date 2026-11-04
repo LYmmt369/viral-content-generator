@@ -1,4 +1,4 @@
-# LYmmt369 Viral Content Generator 4.1.2 API
+# LYmmt369 Viral Content Generator 4.1.3 API
 
 安装：在仓库根目录运行 `pip install .`。模型调用需要对应环境变量密钥。下列 YOUR_MODEL 替换为账号可用模型。
 
@@ -54,3 +54,7 @@ CLI 与 Python API 使用同一生成与检查流程。目录输出各平台独�
 ## 发布反馈
 
 见[反馈口径](feedback.md)：原始记录完整保留；缺数据为 null；不同作品及观察窗口分别展示；累计快照不相加；不自动宣称胜者或统计可靠性。
+
+## 趋势源
+
+抖音、小红书、TikTok 及 Google Trends 的 `fetch()` 当前返回内置示例，`source` 以 `sample:` 开头，`created_at` 和指标时间为 null。示例不能作为实时热点或真实表现数据。Google Trends 的可选 `fetch_real_trends()` 单独依赖 pytrends；依赖缺失时会明确提示并返回已标记的示例。

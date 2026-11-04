@@ -3,7 +3,7 @@ TikTok 热点来源
 v4.0 - 从 TikTok 获取热点话题
 
 作者: Sunnyeung
-版本: 4.1.1
+版本: 4.1.3
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """
@@ -31,11 +31,7 @@ class TikTokTrendSource(BaseTrendSource):
         self.region = config.get("region", "US") if config else "US"
         self.language = config.get("language", "en") if config else "en"
 
-    def fetch(
-        self,
-        limit: int = 20,
-        category: str | None = None
-    ) -> list[Trend]:
+    def fetch(self, limit: int = 20, category: str | None = None) -> list[Trend]:
         """获取 TikTok 热点话题
 
         Args:
@@ -53,10 +49,10 @@ class TikTokTrendSource(BaseTrendSource):
 
         for i, item in enumerate(sample_trends[:limit]):
             trend = Trend(
-                id=f"tiktok_{datetime.now(timezone.utc).strftime('%Y%m%d')}_{i}",
+                id=f"sample_tiktok_{i}",
                 topic=item["topic"],
                 description=item.get("description", ""),
-                source="TikTok",
+                source="sample:TikTok",
                 url=item.get("url", ""),
                 category=self._infer_category(item["topic"], item.get("hashtags", [])),
                 keywords=item.get("hashtags", []),
@@ -64,10 +60,10 @@ class TikTokTrendSource(BaseTrendSource):
                     heat=item.get("views", 0) // 10000,  # 将播放量转换为热度
                     discussion_count=item.get("engagement", 0),
                     growth_rate=item.get("growth", 0.0),
-                    timestamp=datetime.now(timezone.utc)
+                    timestamp=None,
                 ),
                 content_snippet=item.get("snippet"),
-                created_at=datetime.now(timezone.utc)
+                created_at=None,
             )
             trends.append(trend)
 
@@ -84,7 +80,7 @@ class TikTokTrendSource(BaseTrendSource):
                 "views": 5000000,
                 "engagement": 500000,
                 "growth": 20.5,
-                "snippet": "用AI工具提升10倍工作效率的秘密..."
+                "snippet": "用AI工具提升10倍工作效率的秘密...",
             },
             {
                 "topic": "#2026年趋势预测",
@@ -94,7 +90,7 @@ class TikTokTrendSource(BaseTrendSource):
                 "views": 3500000,
                 "engagement": 300000,
                 "growth": 15.0,
-                "snippet": "这些行业将在2026年迎来爆发..."
+                "snippet": "这些行业将在2026年迎来爆发...",
             },
             {
                 "topic": "#居家健身挑战",
@@ -104,7 +100,7 @@ class TikTokTrendSource(BaseTrendSource):
                 "views": 8000000,
                 "engagement": 800000,
                 "growth": 8.0,
-                "snippet": "7天居家健身挑战，第1天..."
+                "snippet": "7天居家健身挑战，第1天...",
             },
             {
                 "topic": "#创业故事分享",
@@ -114,7 +110,7 @@ class TikTokTrendSource(BaseTrendSource):
                 "views": 2000000,
                 "engagement": 200000,
                 "growth": 12.0,
-                "snippet": "从0到100万，我的创业故事..."
+                "snippet": "从0到100万，我的创业故事...",
             },
             {
                 "topic": "#美食制作教程",
@@ -124,7 +120,7 @@ class TikTokTrendSource(BaseTrendSource):
                 "views": 10000000,
                 "engagement": 1000000,
                 "growth": 5.5,
-                "snippet": "5分钟搞定豪华晚餐..."
+                "snippet": "5分钟搞定豪华晚餐...",
             },
         ]
 

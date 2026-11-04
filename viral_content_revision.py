@@ -182,7 +182,7 @@ def _write_new_files(files: dict[Path, str], inputs: list[Path]) -> None:
             with path.open("xb") as handle:
                 created.append(path)
                 handle.write(content.encode("utf-8"))
-    except OSError:
+    except (OSError, UnicodeError, TypeError):
         for path in reversed(created):
             path.unlink()
         raise
@@ -194,7 +194,7 @@ def main(
     parser = argparse.ArgumentParser(
         description="Draft from materials or make exact edits. No Skill routing or interactive questions."
     )
-    parser.add_argument("--version", action="version", version="%(prog)s 4.1.2")
+    parser.add_argument("--version", action="version", version="%(prog)s 4.1.3")
     commands = parser.add_subparsers(dest="command", required=True)
     identify = commands.add_parser("fingerprint", help="print the exact manuscript version")
     identify.add_argument("manuscript", type=Path)

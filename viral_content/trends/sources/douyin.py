@@ -3,7 +3,7 @@
 v4.0 - 从抖音获取热点话题
 
 作者: Sunnyeung
-版本: 4.1.1
+版本: 4.1.3
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """
@@ -29,11 +29,7 @@ class DouyinTrendSource(BaseTrendSource):
         """
         super().__init__("抖音", config)
 
-    def fetch(
-        self,
-        limit: int = 20,
-        category: str | None = None
-    ) -> list[Trend]:
+    def fetch(self, limit: int = 20, category: str | None = None) -> list[Trend]:
         """获取抖音热点话题
 
         Args:
@@ -50,10 +46,10 @@ class DouyinTrendSource(BaseTrendSource):
 
         for i, item in enumerate(sample_trends[:limit]):
             trend = Trend(
-                id=f"douyin_{datetime.now(timezone.utc).strftime('%Y%m%d')}_{i}",
+                id=f"sample_douyin_{i}",
                 topic=item["topic"],
                 description=item.get("description", ""),
-                source="抖音",
+                source="sample:抖音",
                 url=item.get("url", ""),
                 category=self._infer_category(item["topic"], item.get("hashtags", [])),
                 keywords=item.get("hashtags", []),
@@ -61,10 +57,10 @@ class DouyinTrendSource(BaseTrendSource):
                     heat=item.get("heat", 50),
                     discussion_count=item.get("comments", 0) + item.get("shares", 0),
                     growth_rate=item.get("growth", 0.0),
-                    timestamp=datetime.now(timezone.utc)
+                    timestamp=None,
                 ),
                 content_snippet=item.get("snippet"),
-                created_at=datetime.now(timezone.utc)
+                created_at=None,
             )
             trends.append(trend)
 
@@ -82,7 +78,7 @@ class DouyinTrendSource(BaseTrendSource):
                 "comments": 50000,
                 "shares": 30000,
                 "growth": 25.0,
-                "snippet": "志愿填报避坑指南，这几点一定要知道..."
+                "snippet": "志愿填报避坑指南，这几点一定要知道...",
             },
             {
                 "topic": "#AI副业赚钱",
@@ -93,7 +89,7 @@ class DouyinTrendSource(BaseTrendSource):
                 "comments": 30000,
                 "shares": 20000,
                 "growth": 18.5,
-                "snippet": "用AI工具每天多赚500元的方法..."
+                "snippet": "用AI工具每天多赚500元的方法...",
             },
             {
                 "topic": "#职场生存指南",
@@ -104,7 +100,7 @@ class DouyinTrendSource(BaseTrendSource):
                 "comments": 15000,
                 "shares": 10000,
                 "growth": 10.0,
-                "snippet": "职场人必看的5条生存法则..."
+                "snippet": "职场人必看的5条生存法则...",
             },
             {
                 "topic": "#短视频爆款公式",
@@ -115,7 +111,7 @@ class DouyinTrendSource(BaseTrendSource):
                 "comments": 25000,
                 "shares": 18000,
                 "growth": 12.5,
-                "snippet": "3个简单公式，让你的视频轻松10万+..."
+                "snippet": "3个简单公式，让你的视频轻松10万+...",
             },
             {
                 "topic": "#宝妈创业故事",
@@ -126,7 +122,7 @@ class DouyinTrendSource(BaseTrendSource):
                 "comments": 20000,
                 "shares": 15000,
                 "growth": 8.0,
-                "snippet": "从全职宝妈到月入5万，我的创业路..."
+                "snippet": "从全职宝妈到月入5万，我的创业路...",
             },
         ]
 

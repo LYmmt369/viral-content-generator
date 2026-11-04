@@ -3,7 +3,7 @@ Google Trends 热点来源
 v4.0 - 从 Google Trends 获取热点
 
 作者: Sunnyeung
-版本: 4.1.1
+版本: 4.1.3
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """
@@ -37,11 +37,7 @@ class GoogleTrendsSource(BaseTrendSource):
         self.geo = config.get("geo", "CN") if config else "CN"
         self.language = config.get("language", "zh-CN") if config else "zh-CN"
 
-    def fetch(
-        self,
-        limit: int = 20,
-        category: str | None = None
-    ) -> list[Trend]:
+    def fetch(self, limit: int = 20, category: str | None = None) -> list[Trend]:
         """获取 Google Trends 热点
 
         Args:
@@ -60,10 +56,10 @@ class GoogleTrendsSource(BaseTrendSource):
 
         for i, item in enumerate(sample_trends[:limit]):
             trend = Trend(
-                id=f"gt_{datetime.now(timezone.utc).strftime('%Y%m%d')}_{i}",
+                id=f"sample_google_trends_{i}",
                 topic=item["topic"],
                 description=item.get("description", ""),
-                source="Google Trends",
+                source="sample:Google Trends",
                 url=item.get("url", ""),
                 category=self._infer_category(item["topic"]),
                 keywords=item.get("keywords", []),
@@ -71,9 +67,9 @@ class GoogleTrendsSource(BaseTrendSource):
                     heat=item.get("heat", 50),
                     discussion_count=item.get("discussion", 0),
                     growth_rate=item.get("growth", 0.0),
-                    timestamp=datetime.now(timezone.utc)
+                    timestamp=None,
                 ),
-                created_at=datetime.now(timezone.utc)
+                created_at=None,
             )
             trends.append(trend)
 
@@ -90,7 +86,7 @@ class GoogleTrendsSource(BaseTrendSource):
                 "keywords": ["AI", "Agent", "Runtime", "崩溃"],
                 "heat": 86,
                 "discussion": 50000,
-                "growth": 15.5
+                "growth": 15.5,
             },
             {
                 "topic": "马斯克 2026 访谈解读",
@@ -99,7 +95,7 @@ class GoogleTrendsSource(BaseTrendSource):
                 "keywords": ["马斯克", "访谈", "特斯拉", "SpaceX"],
                 "heat": 92,
                 "discussion": 120000,
-                "growth": 8.2
+                "growth": 8.2,
             },
             {
                 "topic": "2026年高考志愿填报指南",
@@ -108,7 +104,7 @@ class GoogleTrendsSource(BaseTrendSource):
                 "keywords": ["高考", "志愿", "填报", "大学"],
                 "heat": 78,
                 "discussion": 30000,
-                "growth": 25.0
+                "growth": 25.0,
             },
             {
                 "topic": "新能源汽车价格战升级",
@@ -117,7 +113,7 @@ class GoogleTrendsSource(BaseTrendSource):
                 "keywords": ["新能源", "汽车", "价格", "降价"],
                 "heat": 75,
                 "discussion": 25000,
-                "growth": 5.5
+                "growth": 5.5,
             },
             {
                 "topic": "远程办公软件评测 2026",
@@ -126,7 +122,7 @@ class GoogleTrendsSource(BaseTrendSource):
                 "keywords": ["远程", "办公", "软件", "工具"],
                 "heat": 65,
                 "discussion": 15000,
-                "growth": 3.2
+                "growth": 3.2,
             },
         ]
 
@@ -150,11 +146,7 @@ class GoogleTrendsSource(BaseTrendSource):
         else:
             return TrendCategory.UNKNOWN
 
-    def fetch_real_trends(
-        self,
-        limit: int = 20,
-        category: str | None = None
-    ) -> list[Trend]:
+    def fetch_real_trends(self, limit: int = 20, category: str | None = None) -> list[Trend]:
         """获取真实 Google Trends 热点（需要 pytrends）
 
         此方法需要安装 pytrends: pip install pytrends
@@ -191,15 +183,17 @@ class GoogleTrendsSource(BaseTrendSource):
                         heat=int(score) if score else 50,
                         discussion_count=0,  # Google Trends 不提供讨论量
                         growth_rate=0.0,
-                        timestamp=datetime.now(timezone.utc)
+                        timestamp=datetime.now(timezone.utc),
                     ),
-                    created_at=datetime.now(timezone.utc)
+                    created_at=datetime.now(timezone.utc),
                 )
                 trends.append(trend)
 
             return trends
 
-        except Exception as e:  # noqa: BLE001 - normalize boundary errors for stable CLI/API behavior
+        except (
+            Exception
+        ) as e:  # noqa: BLE001 - normalize boundary errors for stable CLI/API behavior
             print(f"获取 Google Trends 失败: {e}")
             return []
 

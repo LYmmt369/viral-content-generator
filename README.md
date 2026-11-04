@@ -1,4 +1,4 @@
-# Viral Content Generator v4.1.2
+# Viral Content Generator v4.1.3
 
 **用自己的材料成稿，再按作者意图精准改好。**
 
@@ -93,3 +93,5 @@ viral-content --topic "项目案例" --account data/accounts/default_account.yam
 [Skill 入口](SKILL.md) · [当前 API](docs/API文档.md) · [反馈口径](docs/feedback.md)
 
 批量主题若指定文件路径 draft.md，将按主题顺序写入 draft.1.md、draft.2.md；每个主题的多平台文件再加平台后缀。
+
+旧趋势源中的抖音、小红书、TikTok 和 Google Trends `fetch()` 当前返回**内置示例**；返回值明确标为 `sample:`，不作为实时平台数据。

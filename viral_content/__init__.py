@@ -3,12 +3,12 @@ Viral Content Generator v4.0
 热点风格成交引擎
 
 作者: Sunnyeung
-版本: 4.1.2
+版本: 4.1.3
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """
 
-__version__ = "4.1.2"
+__version__ = "4.1.3"
 __author__ = "Sunnyeung"
 
 # 核心模块

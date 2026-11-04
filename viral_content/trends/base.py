@@ -3,7 +3,7 @@
 v4.0 - 热点情报引擎
 
 作者: Sunnyeung
-版本: 4.1.1
+版本: 4.1.3
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """
@@ -17,6 +17,7 @@ from typing import Any
 
 class TrendCategory(Enum):
     """热点分类"""
+
     TECH = "tech"  # 科技
     BUSINESS = "business"  # 商业
     ENTERTAINMENT = "entertainment"  # 娱乐
@@ -30,6 +31,7 @@ class TrendCategory(Enum):
 @dataclass
 class TrendMetrics:
     """热点指标"""
+
     heat: int = 0  # 热度 (0-100)
     discussion_count: int = 0  # 讨论量
     growth_rate: float = 0.0  # 增长率
@@ -48,6 +50,7 @@ class TrendMetrics:
 @dataclass
 class Trend:
     """热点数据"""
+
     id: str  # 唯一标识
     topic: str  # 话题标题
     description: str = ""  # 描述
@@ -58,7 +61,7 @@ class Trend:
     metrics: TrendMetrics | None = None  # 热度指标
     content_snippet: str | None = None  # 内容片段
     related_topics: list[str] = field(default_factory=list)  # 相关话题
-    created_at: datetime = field(default_factory=datetime.now)  # 抓取时间
+    created_at: datetime | None = field(default_factory=datetime.now)  # 抓取时间
 
     def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
@@ -68,12 +71,14 @@ class Trend:
             "description": self.description,
             "source": self.source,
             "url": self.url,
-            "category": self.category.value if isinstance(self.category, TrendCategory) else self.category,
+            "category": (
+                self.category.value if isinstance(self.category, TrendCategory) else self.category
+            ),
             "keywords": self.keywords,
             "metrics": self.metrics.to_dict() if self.metrics else None,
             "content_snippet": self.content_snippet,
             "related_topics": self.related_topics,
-            "created_at": self.created_at.isoformat(),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
     @classmethod
@@ -102,6 +107,11 @@ class Trend:
                 heat=metrics_data.get("热度", 0),
                 discussion_count=metrics_data.get("讨论量", 0),
                 growth_rate=metrics_data.get("增长率", 0.0),
+                timestamp=(
+                    datetime.fromisoformat(metrics_data["时间戳"])
+                    if metrics_data.get("时间戳")
+                    else None
+                ),
             )
 
         return cls(
@@ -115,6 +125,15 @@ class Trend:
             metrics=metrics,
             content_snippet=data.get("content_snippet"),
             related_topics=data.get("related_topics", []),
+            **(
+                {
+                    "created_at": (
+                        datetime.fromisoformat(data["created_at"]) if data["created_at"] else None
+                    )
+                }
+                if "created_at" in data
+                else {}
+            ),
         )
 
 
@@ -183,9 +202,7 @@ class TrendAggregator:
         self.sources = sources or []
 
     def fetch_all(
-        self,
-        limit_per_source: int = 10,
-        category: str | None = None
+        self, limit_per_source: int = 10, category: str | None = None
     ) -> dict[str, list[Trend]]:
         """从所有来源获取热点
 
@@ -205,17 +222,15 @@ class TrendAggregator:
                     results[source.get_source_name()] = trends
                 else:
                     results[source.get_source_name()] = []
-            except Exception as e:  # noqa: BLE001 - normalize boundary errors for stable CLI/API behavior
+            except (
+                Exception
+            ) as e:  # noqa: BLE001 - normalize boundary errors for stable CLI/API behavior
                 print(f"获取{source.get_source_name()}热点失败: {e}")
                 results[source.get_source_name()] = []
 
         return results
 
-    def merge_and_rank(
-        self,
-        all_trends: dict[str, list[Trend]],
-        limit: int = 50
-    ) -> list[Trend]:
+    def merge_and_rank(self, all_trends: dict[str, list[Trend]], limit: int = 50) -> list[Trend]:
         """合并并排序所有热点
 
         Args:
@@ -235,10 +250,7 @@ class TrendAggregator:
                 merged.append(trend)
 
         # 按热度排序
-        merged.sort(
-            key=lambda t: t.metrics.heat if t.metrics else 0,
-            reverse=True
-        )
+        merged.sort(key=lambda t: t.metrics.heat if t.metrics else 0, reverse=True)
 
         # 去重（按话题相似度）
         unique = []
@@ -256,10 +268,7 @@ class TrendAggregator:
         return unique
 
     def fetch_merged(
-        self,
-        limit_per_source: int = 10,
-        final_limit: int = 50,
-        category: str | None = None
+        self, limit_per_source: int = 10, final_limit: int = 50, category: str | None = None
     ) -> list[Trend]:
         """获取并合并热点（便捷方法）
 

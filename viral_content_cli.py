@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LYmmt369 内容生成与平台输出 CLI 4.1.2。"""
+"""LYmmt369 内容生成与平台输出 CLI 4.1.3。"""
 
 import argparse
 import json
@@ -237,9 +237,6 @@ class ViralContentCLI:
         results = []
 
         for i, trend in enumerate(hot_topics):
-            logger.info(f"正在处理第 {i+1}/{len(hot_topics)} 个热点: {trend.get('topic', '')}")
-
-            topic = trend.get("topic", trend.get("description", ""))
             request_options = dict(kwargs)
             output_path = request_options.get("output_path")
             if output_path is not None:
@@ -250,6 +247,12 @@ class ViralContentCLI:
                     )
 
             try:
+                if not isinstance(trend, dict):
+                    raise ValueError("热点条目必须是包含 topic 的对象")
+                topic = trend.get("topic") or trend.get("description")
+                if not isinstance(topic, str) or not topic.strip():
+                    raise ValueError("热点条目缺少非空 topic 或 description")
+                logger.info("正在处理第 %d/%d 个热点: %s", i + 1, len(hot_topics), topic)
                 content = self.generate(topic=topic, **request_options)
 
                 results.append(
@@ -345,7 +348,7 @@ class ViralContentCLI:
 def parse_arguments():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(
-        description="LYmmt369 内容生成器 4.1.2 - 生成并检查各平台稿件",
+        description="LYmmt369 内容生成器 4.1.3 - 生成并检查各平台稿件",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例用法:
@@ -439,7 +442,7 @@ def parse_arguments():
     # 工具参数
     parser.add_argument("--list-styles", action="store_true", help="列出所有可用风格")
 
-    parser.add_argument("--version", action="version", version="%(prog)s 4.1.2")
+    parser.add_argument("--version", action="version", version="%(prog)s 4.1.3")
 
     args = parser.parse_args()
     if args.topic and args.topic_option and args.topic != args.topic_option:
