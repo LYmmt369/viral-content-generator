@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LYmmt369 内容生成与平台输出 CLI 4.1.4。"""
+"""LYmmt369 内容生成与平台输出 CLI 4.1.5。"""
 
 import argparse
 import json
@@ -90,12 +90,10 @@ class HotTopicInput:
             else:
                 raise ValueError(f"不支持的文件格式: {suffix}")
 
-        if isinstance(data, dict) and "trends" in data:
-            return data["trends"]
-        elif isinstance(data, list):
-            return data
-        else:
+        trends = data.get("trends") if isinstance(data, dict) else data
+        if not isinstance(trends, list) or not trends:
             raise ValueError("热点数据格式错误")
+        return trends
 
     @staticmethod
     def from_text(text: str) -> list[dict[str, Any]]:
@@ -234,6 +232,8 @@ class ViralContentCLI:
         Returns:
             生成结果列表
         """
+        if not isinstance(hot_topics, list) or not hot_topics:
+            raise ValueError("热点列表不能为空，且必须为列表")
         results = []
 
         for i, trend in enumerate(hot_topics):
@@ -348,7 +348,7 @@ class ViralContentCLI:
 def parse_arguments():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(
-        description="LYmmt369 内容生成器 4.1.4 - 生成并检查各平台稿件",
+        description="LYmmt369 内容生成器 4.1.5 - 生成并检查各平台稿件",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例用法:
@@ -442,12 +442,14 @@ def parse_arguments():
     # 工具参数
     parser.add_argument("--list-styles", action="store_true", help="列出所有可用风格")
 
-    parser.add_argument("--version", action="version", version="%(prog)s 4.1.4")
+    parser.add_argument("--version", action="version", version="%(prog)s 4.1.5")
 
     args = parser.parse_args()
     if args.topic and args.topic_option and args.topic != args.topic_option:
         parser.error("主题位置参数与 --topic 不一致")
     args.topic = args.topic_option or args.topic
+    if args.topic and args.trends_file:
+        parser.error("--topic 与 --trends-file 只能选择一个")
     return args
 
 

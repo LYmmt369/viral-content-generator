@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "viral-content-generator"
-version = "4.1.4"
+version = "4.1.5"
 description = "材料成稿与精准改稿：保护原句、保留未改内容、记录差异并准确撤回"
 readme = "README.md"
 license = "MIT"

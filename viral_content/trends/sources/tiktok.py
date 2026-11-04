@@ -3,7 +3,7 @@ TikTok 热点来源
 v4.0 - 从 TikTok 获取热点话题
 
 作者: Sunnyeung
-版本: 4.1.4
+版本: 4.1.5
 许可: MIT License
 GitHub: https://github.com/LYmmt369/viral-content-generator
 """

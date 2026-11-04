@@ -138,6 +138,8 @@ class ViralContentPipeline:
         *,
         generator_factory=None,
     ):
+        if not isinstance(trends, list) or not trends:
+            raise ValidationError("trends 必须是非空列表")
         targets = [Platform(p).value for p in (platforms or ["wechat"])]
         if len(set(targets)) != len(targets):
             raise ValidationError("平台不能重复")

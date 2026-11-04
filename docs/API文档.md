@@ -1,4 +1,4 @@
-# LYmmt369 Viral Content Generator 4.1.4 API
+# LYmmt369 Viral Content Generator 4.1.5 API
 
 安装：在仓库根目录运行 `pip install .`。模型调用需要对应环境变量密钥。下列 YOUR_MODEL 替换为账号可用模型。
 
@@ -39,7 +39,7 @@ for result in results:
 viral-content --topic "项目案例" --platform wechat xiaohongshu --ai-platform openai --model YOUR_MODEL --output drafts/
 ```
 
-CLI 与 Python API 使用同一生成与检查流程。目录输出各平台独立文件；文件名 draft.md 对多平台扩展为 draft.wechat.md 等。全部检查通过才写出；写入失败回滚本次新建文件。禁止覆盖已有输出。--stream 当前明确拒绝，避免检查前输出草稿。批量主题命令逐主题记录成功或失败，有失败时退出码为 1。指定文件 draft.md 时按主题顺序写入 draft.1.md、draft.2.md；多平台再添加平台后缀。
+CLI 与 Python API 使用同一生成与检查流程。目录输出各平台独立文件；文件名 draft.md 对多平台扩展为 draft.wechat.md 等。全部检查通过才写出；写入失败回滚本次新建文件。禁止覆盖已有输出。--stream 当前明确拒绝，避免检查前输出草稿。--topic 与 --trends-file 只能选一个；空热点文件和空批量请求会报错；批量主题命令逐主题记录成功或失败，有失败时退出码为 1。指定文件 draft.md 时按主题顺序写入 draft.1.md、draft.2.md；多平台再添加平台后缀。
 
 ## 平台转换
 

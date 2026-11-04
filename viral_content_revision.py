@@ -194,7 +194,7 @@ def main(
     parser = argparse.ArgumentParser(
         description="Draft from materials or make exact edits. No Skill routing or interactive questions."
     )
-    parser.add_argument("--version", action="version", version="%(prog)s 4.1.4")
+    parser.add_argument("--version", action="version", version="%(prog)s 4.1.5")
     commands = parser.add_subparsers(dest="command", required=True)
     identify = commands.add_parser("fingerprint", help="print the exact manuscript version")
     identify.add_argument("manuscript", type=Path)
