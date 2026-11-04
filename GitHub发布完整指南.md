@@ -1,10 +1,10 @@
-> 历史资料：以下命令、版本和验收结论不代表当前 4.1.1。当前使用说明见 [README](README.md)。
+> 历史资料：以下命令、版本和验收结论不代表当前 4.1.2。当前使用说明见 [README](README.md)。
 
 # GitHub发布完整指南
 
 ## 🎯 你的仓库信息
 
-**GitHub用户名：** Sunnyeung369
+**GitHub用户名：** LYmmt369
 **仓库名：** viral-content-generator
 **仓库地址：** https://github.com/LYmmt369/viral-content-generator
 
@@ -116,7 +116,7 @@ git push -u origin main
 2. 添加到GitHub：https://github.com/settings/keys
 3. 修改remote URL：
    ```powershell
-   git remote set-url origin git@github.com:Sunnyeung369/viral-content-generator.git
+   git remote set-url origin git@github.com:LYmmt369/viral-content-generator.git
    ```
 
 ---

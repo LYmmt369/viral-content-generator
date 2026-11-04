@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LYmmt369 内容生成与平台输出 CLI 4.1.1。"""
+"""LYmmt369 内容生成与平台输出 CLI 4.1.2。"""
 
 import argparse
 import json
@@ -32,34 +32,34 @@ from viral_content.utils.observability import configure_json_logging
 # 配置日志
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler('viral_content_generator.log', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
+        logging.FileHandler("viral_content_generator.log", encoding="utf-8"),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
 
 # 常量定义
 SUPPORTED_PLATFORMS = {
-    'openai': 'OpenAI',
-    'claude': 'Claude',
-    'gemini': 'Gemini',
+    "openai": "OpenAI",
+    "claude": "Claude",
+    "gemini": "Gemini",
 }
 
 CONTENT_PLATFORMS = {
-    'wechat': '公众号',
-    'video': '视频号',
-    'xiaohongshu': '小红书',
-    'zhihu': '知乎',
-    'douyin': '抖音',
-    'bilibili': 'B站',
-    'weibo': '微博',
+    "wechat": "公众号",
+    "video": "视频号",
+    "xiaohongshu": "小红书",
+    "zhihu": "知乎",
+    "douyin": "抖音",
+    "bilibili": "B站",
+    "weibo": "微博",
 }
 
-CONVERSION_GOALS = ['likes', 'comments', 'leads', 'sales']
+CONVERSION_GOALS = ["likes", "comments", "leads", "sales"]
 
-DEFAULT_MODEL = 'claude-3-5-sonnet-20241022'
+DEFAULT_MODEL = "claude-3-5-sonnet-20241022"
 DEFAULT_MAX_TOKENS = 8192
 DEFAULT_TEMPERATURE = 0.7
 
@@ -82,16 +82,16 @@ class HotTopicInput:
 
         suffix = file_path.suffix.lower()
 
-        with open(file_path, 'r', encoding='utf-8') as f:
-            if suffix == '.json':
+        with open(file_path, "r", encoding="utf-8") as f:
+            if suffix == ".json":
                 data = json.load(f)
-            elif suffix in ['.yaml', '.yml']:
+            elif suffix in [".yaml", ".yml"]:
                 data = yaml.safe_load(f)
             else:
                 raise ValueError(f"不支持的文件格式: {suffix}")
 
-        if isinstance(data, dict) and 'trends' in data:
-            return data['trends']
+        if isinstance(data, dict) and "trends" in data:
+            return data["trends"]
         elif isinstance(data, list):
             return data
         else:
@@ -107,16 +107,18 @@ class HotTopicInput:
         Returns:
             热点列表
         """
-        return [{
-            'id': f'trend_{int(datetime.now(timezone.utc).timestamp())}',
-            'topic': text.strip(),
-            'description': text.strip(),
-            'source': 'manual_input',
-            'url': '',
-            'metrics': {'热度': 0, '讨论量': 0},
-            'keywords': [],
-            'category': '',
-        }]
+        return [
+            {
+                "id": f"trend_{int(datetime.now(timezone.utc).timestamp())}",
+                "topic": text.strip(),
+                "description": text.strip(),
+                "source": "manual_input",
+                "url": "",
+                "metrics": {"热度": 0, "讨论量": 0},
+                "keywords": [],
+                "category": "",
+            }
+        ]
 
 
 class ViralContentCLI:
@@ -133,9 +135,9 @@ class ViralContentCLI:
         style_mix: str | None = None,
         account: Path | None = None,
         offer: Path | None = None,
-        goal: str = 'leads',
+        goal: str = "leads",
         content_platforms: list[str] | None = None,
-        ai_platform: str = 'claude',
+        ai_platform: str = "claude",
         model: str | None = None,
         api_key: str | None = None,
         temperature: float = DEFAULT_TEMPERATURE,
@@ -192,24 +194,37 @@ class ViralContentCLI:
                     filename = path
                 output_files[target] = filename
             _check_output_paths(list(output_files.values()), [])
-        config = GenerationConfig(topic=topic, platform=ai_platform, model=model,
-            api_key=api_key, temperature=temperature, max_tokens=max_tokens,
-            variants=variants, enable_scoring=enable_scoring)
+        config = GenerationConfig(
+            topic=topic,
+            platform=ai_platform,
+            model=model,
+            api_key=api_key,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            variants=variants,
+            enable_scoring=enable_scoring,
+        )
         pipeline = ViralContentPipeline()
-        results = [pipeline.run(topic, account, offer, style_mix or style, goal,
-                    target, config=config, generator_factory=create_generator)
-                   for target in targets]
+        results = [
+            pipeline.run(
+                topic,
+                account,
+                offer,
+                style_mix or style,
+                goal,
+                target,
+                config=config,
+                generator_factory=create_generator,
+            )
+            for target in targets
+        ]
         if output_files:
             _write_new_files({output_files[r.content_platform]: r.content for r in results}, [])
         if len(results) == 1:
             return results[0].content
         return "\n\n".join(f"## {r.content_platform}\n\n{r.content}" for r in results)
 
-    def batch_generate(
-        self,
-        hot_topics: list[dict[str, Any]],
-        **kwargs
-    ) -> list[dict[str, Any]]:
+    def batch_generate(self, hot_topics: list[dict[str, Any]], **kwargs) -> list[dict[str, Any]]:
         """批量生成内容
 
         Args:
@@ -224,28 +239,39 @@ class ViralContentCLI:
         for i, trend in enumerate(hot_topics):
             logger.info(f"正在处理第 {i+1}/{len(hot_topics)} 个热点: {trend.get('topic', '')}")
 
-            topic = trend.get('topic', trend.get('description', ''))
+            topic = trend.get("topic", trend.get("description", ""))
+            request_options = dict(kwargs)
+            output_path = request_options.get("output_path")
+            if output_path is not None:
+                output_path = Path(output_path)
+                if output_path.suffix and not output_path.is_dir():
+                    request_options["output_path"] = output_path.with_name(
+                        f"{output_path.stem}.{i + 1}{output_path.suffix}"
+                    )
 
             try:
-                content = self.generate(
-                    topic=topic,
-                    **kwargs
+                content = self.generate(topic=topic, **request_options)
+
+                results.append(
+                    {
+                        "trend": trend,
+                        "content": content,
+                        "success": True,
+                    }
                 )
 
-                results.append({
-                    'trend': trend,
-                    'content': content,
-                    'success': True,
-                })
-
-            except Exception as e:  # noqa: BLE001 - normalize boundary errors for stable CLI/API behavior
+            except (
+                Exception
+            ) as e:  # noqa: BLE001 - normalize boundary errors for stable CLI/API behavior
                 logger.error(f"生成失败: {e}")
-                results.append({
-                    'trend': trend,
-                    'content': None,
-                    'success': False,
-                    'error': str(e),
-                })
+                results.append(
+                    {
+                        "trend": trend,
+                        "content": None,
+                        "success": False,
+                        "error": str(e),
+                    }
+                )
 
         return results
 
@@ -271,7 +297,17 @@ class ViralContentCLI:
         else:
             return 8.0
 
-    def _save_output(self, content: str, output_path: Path, topic: str, goal: str, platform: str, *, experiment_id: str = "", candidate_count: int = 1):
+    def _save_output(
+        self,
+        content: str,
+        output_path: Path,
+        topic: str,
+        goal: str,
+        platform: str,
+        *,
+        experiment_id: str = "",
+        candidate_count: int = 1,
+    ):
         """保存输出
 
         Args:
@@ -285,7 +321,7 @@ class ViralContentCLI:
 
         # 如果是目录，生成文件名
         if output_path.is_dir():
-            timestamp = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
             filename = f"{goal}_{platform}_{timestamp}.md"
             output_path = output_path / filename
 
@@ -293,7 +329,7 @@ class ViralContentCLI:
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         # 写入文件
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(f"# {topic}\n\n")
             f.write(f"**实验 ID**: {experiment_id}\n")
             f.write(f"**候选数量**: {candidate_count}\n")
@@ -309,9 +345,9 @@ class ViralContentCLI:
 def parse_arguments():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(
-        description='LYmmt369 内容生成器 4.1.1 - 生成并检查各平台稿件',
+        description="LYmmt369 内容生成器 4.1.2 - 生成并检查各平台稿件",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='''
+        epilog="""
 示例用法:
 
   # 基础用法（向后兼容v3.1）
@@ -338,138 +374,76 @@ def parse_arguments():
     --topic "AI工具使用技巧" \\
     --platform douyin xiaohongshu wechat \\
     --goal likes
-        '''
+        """,
     )
 
     # 核心参数
-    parser.add_argument(
-        'topic',
-        nargs='?',
-        help='热点话题（与--trends-file二选一）'
-    )
-    parser.add_argument('--topic', dest='topic_option', help='主题（也可使用位置参数）')
+    parser.add_argument("topic", nargs="?", help="热点话题（与--trends-file二选一）")
+    parser.add_argument("--topic", dest="topic_option", help="主题（也可使用位置参数）")
 
-    parser.add_argument(
-        '--trends-file',
-        type=Path,
-        help='热点数据文件（JSON/YAML格式）'
-    )
+    parser.add_argument("--trends-file", type=Path, help="热点数据文件（JSON/YAML格式）")
 
     # 风格参数
-    parser.add_argument(
-        '--style',
-        help='单一风格ID（如：tech_explainer_global）'
-    )
+    parser.add_argument("--style", help="单一风格ID（如：tech_explainer_global）")
 
-    parser.add_argument(
-        '--style-mix',
-        help='风格混合（逗号分隔，如：style1,style2,style3）'
-    )
+    parser.add_argument("--style-mix", help="风格混合（逗号分隔，如：style1,style2,style3）")
 
     # 账号和产品
-    parser.add_argument(
-        '--account',
-        type=Path,
-        help='账号配置文件路径'
-    )
+    parser.add_argument("--account", type=Path, help="账号配置文件路径")
 
-    parser.add_argument(
-        '--offer',
-        type=Path,
-        help='产品配置文件路径'
-    )
+    parser.add_argument("--offer", type=Path, help="产品配置文件路径")
 
     # 成交目标
     parser.add_argument(
-        '--goal',
-        choices=CONVERSION_GOALS,
-        default='leads',
-        help='成交目标（默认: leads）'
+        "--goal", choices=CONVERSION_GOALS, default="leads", help="成交目标（默认: leads）"
     )
 
     # 平台参数
     parser.add_argument(
-        '--platform',
-        dest='platforms',
+        "--platform",
+        dest="platforms",
         choices=list(CONTENT_PLATFORMS.keys()),
-        nargs='+',
-        help='内容平台（可多选）'
+        nargs="+",
+        help="内容平台（可多选）",
     )
 
     parser.add_argument(
-        '--ai-platform',
+        "--ai-platform",
         choices=list(SUPPORTED_PLATFORMS.keys()),
-        default='claude',
-        help='AI平台（默认: claude）'
+        default="claude",
+        help="AI平台（默认: claude）",
     )
 
     # 模型参数
+    parser.add_argument("--model", help="模型名称（覆盖默认模型）")
+
+    parser.add_argument("--api-key", help="API密钥（或设置环境变量）")
+
     parser.add_argument(
-        '--model',
-        help='模型名称（覆盖默认模型）'
+        "--temperature", type=float, default=DEFAULT_TEMPERATURE, help="温度参数（默认: 0.7）"
     )
 
     parser.add_argument(
-        '--api-key',
-        help='API密钥（或设置环境变量）'
-    )
-
-    parser.add_argument(
-        '--temperature',
-        type=float,
-        default=DEFAULT_TEMPERATURE,
-        help='温度参数（默认: 0.7）'
-    )
-
-    parser.add_argument(
-        '--max-tokens',
-        type=int,
-        default=DEFAULT_MAX_TOKENS,
-        help='最大token数（默认: 8192）'
+        "--max-tokens", type=int, default=DEFAULT_MAX_TOKENS, help="最大token数（默认: 8192）"
     )
 
     # 输出参数
-    parser.add_argument(
-        '--output', '-o',
-        type=Path,
-        help='输出目录或文件路径'
-    )
+    parser.add_argument("--output", "-o", type=Path, help="输出目录或文件路径")
 
-    parser.add_argument(
-        '--variants',
-        type=int,
-        default=1,
-        help='生成变体数量（默认: 1）'
-    )
+    parser.add_argument("--variants", type=int, default=1, help="生成变体数量（默认: 1）")
 
-    parser.add_argument(
-        '--stream',
-        action='store_true',
-        help='启用流式输出'
-    )
+    parser.add_argument("--stream", action="store_true", help="启用流式输出")
 
-    parser.add_argument(
-        '--score',
-        action='store_true',
-        help='启用内容评分'
-    )
+    parser.add_argument("--score", action="store_true", help="启用内容评分")
 
     # 工具参数
-    parser.add_argument(
-        '--list-styles',
-        action='store_true',
-        help='列出所有可用风格'
-    )
+    parser.add_argument("--list-styles", action="store_true", help="列出所有可用风格")
 
-    parser.add_argument(
-        '--version',
-        action='version',
-        version='%(prog)s 4.1.1'
-    )
+    parser.add_argument("--version", action="version", version="%(prog)s 4.1.2")
 
     args = parser.parse_args()
     if args.topic and args.topic_option and args.topic != args.topic_option:
-        parser.error('主题位置参数与 --topic 不一致')
+        parser.error("主题位置参数与 --topic 不一致")
     args.topic = args.topic_option or args.topic
     return args
 
@@ -503,7 +477,9 @@ def main():
         try:
             hot_topics = HotTopicInput.from_file(args.trends_file)
             logger.info(f"加载了 {len(hot_topics)} 个热点")
-        except Exception as e:  # noqa: BLE001 - normalize boundary errors for stable CLI/API behavior
+        except (
+            Exception
+        ) as e:  # noqa: BLE001 - normalize boundary errors for stable CLI/API behavior
             logger.error(f"加载热点文件失败: {e}")
             return 1
 
@@ -527,7 +503,7 @@ def main():
         )
 
         # 输出结果
-        success_count = sum(1 for r in results if r.get('success'))
+        success_count = sum(1 for r in results if r.get("success"))
         logger.info(f"批量生成完成: {success_count}/{len(results)} 成功")
         return 0 if success_count == len(results) else 1
 
@@ -565,5 +541,5 @@ def main():
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

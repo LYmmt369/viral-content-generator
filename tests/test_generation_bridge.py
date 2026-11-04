@@ -91,6 +91,30 @@ class GenerationBridgeContracts(unittest.TestCase):
                 )
             self.assertEqual(list(Path(directory).iterdir()), [])
 
+    def test_batch_file_output_keeps_each_topic(self):
+        def factory(config):
+            return SimpleNamespace(
+                config=config,
+                generate=lambda: GenerationResult(
+                    (config.topic + "：具体案例和执行步骤。") * 30, "openai", "fixture"
+                ),
+            )
+
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch("viral_content_cli.create_generator", side_effect=factory),
+        ):
+            target = Path(directory) / "draft.md"
+            results = ViralContentCLI().batch_generate(
+                [{"topic": "主题一"}, {"topic": "主题二"}],
+                goal="likes",
+                content_platforms=["wechat"],
+                output_path=target,
+            )
+            self.assertTrue(all(item["success"] for item in results))
+            self.assertIn("主题一", target.with_name("draft.1.md").read_text(encoding="utf-8"))
+            self.assertIn("主题二", target.with_name("draft.2.md").read_text(encoding="utf-8"))
+
     def test_documented_topic_option_and_positional_topic_agree(self):
         for argv in [["cli", "主题"], ["cli", "--topic", "主题"]]:
             with self.subTest(argv=argv), patch("sys.argv", argv):

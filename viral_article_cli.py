@@ -1,4 +1,4 @@
-"""Compatibility entrypoint for LYmmt369-viral-article-generator 4.1.1."""
+"""Compatibility entrypoint for LYmmt369-viral-article-generator 4.1.2."""
 from viral_content_cli import main
 
 if __name__ == "__main__":
